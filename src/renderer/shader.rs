@@ -1,5 +1,7 @@
 extern crate gl;
+extern crate glam;
 
+use glam::Mat4;
 use std::ffi::CString;
 use std::fs;
 
@@ -123,6 +125,36 @@ impl Shader {
     pub fn detach(&mut self) {
         unsafe { gl::UseProgram(self.p_id); }
         self.is_used = true;
+    }
+
+    pub fn set_uniform_mat4(&mut self, name: &str, mat: Mat4) {
+        let var_loc = unsafe {
+            let c_str = CString::new(name).expect("");
+            gl::GetUniformLocation(self.p_id, c_str.as_ptr())
+        };
+
+        if !self.is_used {
+            self.attach();
+        }
+
+        unsafe {
+            gl::UniformMatrix4fv(var_loc, 1, gl::FALSE, mat.to_cols_array().as_ptr());
+        }
+    }
+
+    pub fn set_uniform_float(&mut self, name: &str, val: f32) {
+        let var_loc = unsafe {
+            let c_str = CString::new(name).expect("");
+            gl::GetUniformLocation(self.p_id, c_str.as_ptr())
+        };
+
+        if !self.is_used {
+            self.attach();
+        }
+
+        unsafe {
+            gl::Uniform1f(var_loc, val);
+        }
     }
 }
 

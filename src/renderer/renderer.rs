@@ -1,18 +1,18 @@
 extern crate gl;
 
-use crate::renderer::shader::Shader;
+use crate::renderer::{shader::Shader, camera::Camera};
 
 use std::mem;
 
 static mut VAO: u32 = 0;
 
 const VB: [f32; 42] = [
-    0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-    0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-    1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-    1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0,
-    1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0,
-    0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0,
+    0.0, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0,
+    1.0, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0,
+    1.0, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0,
+    1.0, 1.0, -10.0, 1.0, 0.0, 1.0, 1.0,
+    0.0, 1.0, -10.0, 1.0, 1.0, 0.0, 1.0,
 ];
 static mut VBO: u32 = 0;
 
@@ -73,6 +73,8 @@ pub fn update() {
 
         // shader stuff
         DEFAULT_SHADER.attach();
+        DEFAULT_SHADER.set_uniform_mat4("uProjection", Camera::get().projection_mat());
+        DEFAULT_SHADER.set_uniform_mat4("uView", Camera::get().view_mat());
 
         // vertex attrib pointers
         gl::BindVertexArray(VAO);

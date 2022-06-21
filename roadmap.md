@@ -2,10 +2,11 @@ Rage game engine progress:
 
 Renderer:
 - [x] Get window working
-- [ ] First triangle
-- [ ] Shader system
-- [ ] Camera
-- [ ] First quad
+- [x] First triangle
+- [x] Shader system
+- [x] Camera
+- [ ] Abstracted vertex buffer object
+- [ ] First quad (as in first primitive abstraction)
 - [ ] Render primitive system
 - [ ] Data buffers
 - [ ] Polished renderer
