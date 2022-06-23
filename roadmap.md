@@ -5,7 +5,7 @@ Renderer:
 - [x] First triangle
 - [x] Shader system
 - [x] Camera
-- [ ] Abstracted vertex buffer object
+- [x] Abstracted vertex buffer object
 - [ ] First quad (as in first primitive abstraction)
 - [ ] Render primitive system
 - [ ] Data buffers
