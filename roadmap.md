@@ -1,4 +1,5 @@
-Rage game engine progress:
+rage game engine progress:
+thank goodness rust has an automatic build system
 
 Renderer:
 - [x] Get window working
@@ -8,12 +9,19 @@ Renderer:
 - [x] Abstracted vertex buffer object
 - [ ] First quad (as in first primitive abstraction)
 - [ ] Render primitive system
+- [ ] Textures
 - [ ] Data buffers
 - [ ] Polished renderer
+- [ ] Fonts and text?
 
 Core:
 - [ ] Keyboard io
 - [ ] Mouse io
-- [ ] Window config
-- [ ] Misc. config through config.rs
+- [x] Window config
+- [ ] Renderer config
+- [x] Misc. config through config.rs
+- [ ] Scenes - this should wait until ecs is working
+
+Misc:
+- [ ] Make README
 

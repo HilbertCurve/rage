@@ -1,11 +1,14 @@
 extern crate glam;
 
+use crate::core::config::Config;
+
 use glam::{Vec3, Quat, Mat4};
 use std::sync::Once;
 use std::mem::{MaybeUninit};
 
 const PI: f32 = 3.14159265359;
 
+#[derive(Copy, Clone)]
 pub enum CameraMode {
     Orthographic,
     Perspective,
@@ -29,7 +32,7 @@ impl Camera {
             fov: PI / 3.0,
             aspect: 4.0 / 3.0,
             zoom: 1.0,
-            mode: CameraMode::Orthographic,
+            mode: Config::get().proj_mode,
         }
     }
 

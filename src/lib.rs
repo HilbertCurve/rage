@@ -1,14 +1,15 @@
-mod core;
-mod renderer;
+pub mod core;
+pub mod renderer;
 // re-exports here
-pub use crate::core::*;
-pub use crate::renderer::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
     fn it_works() {
-        core::run();
+        let mut config: core::Config = core::Config::default();
+        //config.proj_mode = renderer::camera::CameraMode::Perspective;
+        core::run(config).expect("rage-quit");
     }
 }
+

@@ -21,10 +21,8 @@ const IB: [u32; 6] = [
 static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
 static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
 
-const SOF: usize = mem::size_of::<f32>();
-
 #[derive(Copy, Clone)]
-enum VProp {
+pub enum VProp {
     Position,
     Color,
     TexCoords,
@@ -33,7 +31,7 @@ enum VProp {
 }
 
 #[derive(Copy, Clone)]
-enum VType {
+pub enum VType {
     Byte,
     UByte,
     Short,
@@ -60,7 +58,7 @@ impl VType {
 }
 
 #[derive(Copy, Clone)]
-struct VAttrib {
+pub struct VAttrib {
     v_prop: VProp,
     v_type: VType,
     v_count: u32,
