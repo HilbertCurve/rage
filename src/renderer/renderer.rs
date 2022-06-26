@@ -1,22 +1,26 @@
 extern crate gl;
 
-use crate::renderer::{shader::Shader, camera::Camera};
+use crate::renderer::{
+    camera::Camera,
+    primitive::{self},
+    shader::Shader,
+};
 
 use std::mem;
+use std::ptr;
 
-const VB: [f32; 42] = [
-    0.0, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0,
-    0.0, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0,
-    1.0, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0,
-    1.0, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0,
+const VB: [f32; 56] = [
+    0.0, 0.0, -10.0, 1.0, 1.0, 0.0, 1.0,
+    0.0, 0.5, -10.0, 1.0, 0.0, 1.0, 1.0,
+    0.5, 0.5, -10.0, 0.0, 1.0, 0.0, 1.0,
+    0.5, 0.0, -10.0, 0.0, 1.0, 1.0, 1.0,
+    0.5, 0.5, -10.0, 0.0, 0.0, 1.0, 1.0,
+    0.5, 1.0, -10.0, 0.0, 0.0, 1.0, 1.0,
     1.0, 1.0, -10.0, 1.0, 0.0, 1.0, 1.0,
-    0.0, 1.0, -10.0, 1.0, 1.0, 0.0, 1.0,
+    1.0, 0.5, -10.0, 1.0, 0.0, 0.0, 1.0,
 ];
 
-const IB: [u32; 6] = [
-    0, 1, 2,
-    3, 4, 5,
-];
+static mut IB: Vec<u32> = vec![];
 
 static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
 static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
@@ -71,13 +75,11 @@ struct VertexBuffer {
     layout: Vec<VAttrib>, // should this be a slice???
     is_used: bool,
     // TODO: temporary behavior, will switch to DataBuffer soon
-    vb: &'static [f32],
-    ib: &'static [u32],
+    vb: Vec<f32>,
+    ib: Vec<u32>,
 }
 
 impl VertexBuffer {
-    const NO_VB: [f32; 0] = [];
-    const NO_IB: [u32; 0] = [];
     pub const DEFAULT_ATTRIBS: [VAttrib; 2] = [
         VAttrib { v_prop: VProp::Position, v_type: VType::Float, v_count: 3 },
         VAttrib { v_prop: VProp::Color, v_type: VType::Float, v_count: 4 },
@@ -90,8 +92,8 @@ impl VertexBuffer {
             ibo: 0,
             layout: vec![],
             is_used: false,
-            vb: &VertexBuffer::NO_VB,
-            ib: &VertexBuffer::NO_IB,
+            vb: Vec::new(),
+            ib: Vec::new(),
         }
     }
 
@@ -99,7 +101,7 @@ impl VertexBuffer {
         self.layout = Vec::from(slice);
     }
 
-    pub fn init(&mut self, vb: &'static [f32], ib: &'static [u32]) {
+    pub fn init(&mut self, vb: &[f32], ib: &[u32]) {
         unsafe {
             gl::GenVertexArrays(1, &mut self.vao);
             gl::GenBuffers(1, &mut self.vbo);
@@ -128,8 +130,9 @@ impl VertexBuffer {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
 
-        self.vb = vb;
-        self.ib = ib;
+        self.vb = Vec::from(vb);
+        println!("{}", vb.len());
+        self.ib = Vec::from(ib);
     }
 
     pub fn bind(&mut self) {
@@ -157,12 +160,22 @@ impl VertexBuffer {
             self.bind();
         }
 
-
         unsafe {
+            // regenerate index buffer to match size, if size has changed
+            for i in 0..2 { // TODO: automate size and use dirty flags
+                (primitive::QUAD.gen_indices)(&mut self.ib, i);
+            }
+
             gl::BufferData(
                 gl::ARRAY_BUFFER,
                 (self.vb.len() * mem::size_of::<f32>()) as isize,
                 self.vb.as_ptr().cast(),
+                gl::DYNAMIC_DRAW
+                );
+            gl::BufferData(
+                gl::ELEMENT_ARRAY_BUFFER,
+                (self.ib.len() * mem::size_of::<u32>()) as isize,
+                self.ib.as_ptr().cast(),
                 gl::DYNAMIC_DRAW
                 );
         }
@@ -215,11 +228,20 @@ impl VertexBuffer {
 
 pub fn start() {
     unsafe {
+        // this spot is for initializing default vertex buf, data buf,
+        // and shader, along with some gl settings
+        IB = vec![
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+        ];
+
         DEFAULT_VB.set_layout(&VertexBuffer::DEFAULT_ATTRIBS);
         DEFAULT_VB.init(&VB, &IB);
         DEFAULT_VB.bind();
-        DEFAULT_SHADER = Shader::new("assets/shaders/default.vert", "assets/shaders/default.frag");
         DEFAULT_VB.refresh();
+        DEFAULT_SHADER = Shader::new("assets/shaders/default.vert", "assets/shaders/default.frag");
         DEFAULT_VB.enable_attribs();
 
         gl::ClearColor(0.0, 0.0, 0.0, 1.0);
@@ -227,13 +249,16 @@ pub fn start() {
 }
 
 pub fn update() {
+    // TODO: static vec of data buffers, render each according to their primitive
     unsafe {
         gl::Clear(gl::COLOR_BUFFER_BIT);
 
+        // vb.bind(); ...
         DEFAULT_VB.bind();
         DEFAULT_VB.refresh();
 
         // shader stuff
+        // vb.shader.attach(); ...
         DEFAULT_SHADER.attach();
         DEFAULT_SHADER.set_uniform_mat4("uProjection", Camera::get().projection_mat());
         DEFAULT_SHADER.set_uniform_mat4("uView", Camera::get().view_mat());
@@ -241,7 +266,9 @@ pub fn update() {
         // vertex attrib pointers
         DEFAULT_VB.enable_attribs();
 
-        gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
+        let quad = &primitive::QUAD;
+        // ...(vb.prim.gl_prim, vb.prim.index_count * vb.len, gl::UNSIGNED_INT, ptr::null());
+        gl::DrawElements(quad.gl_prim, 12, gl::UNSIGNED_INT, ptr::null());
 
         DEFAULT_VB.disable_attribs();
 
