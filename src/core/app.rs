@@ -1,9 +1,10 @@
 extern crate gl;
 extern crate glfw;
 
-use glfw::{Action, Context, Key};
+use glfw::Context;
 use crate::renderer;
-use crate::core::config::*;
+use super::config::*;
+use super::keyboard;
 
 use std::sync::mpsc::Receiver;
 
@@ -19,6 +20,7 @@ pub struct Window {
 static mut MAIN_WIN: Option<Window> = None;
 const TITLE: &str = "Rage Game Engine";
 
+#[warn(unused)]
 type GlfwConf = (glfw::Glfw, glfw::Window, Receiver<(f64, glfw::WindowEvent)>);
 
 fn init() -> Result<GlfwConf, String> {
@@ -72,16 +74,20 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
  
         renderer::update();
  
+        if keyboard::is_pressed(glfw::Key::A) {
+            println!("d");
+        }
+
         window.swap_buffers();
     }
 
     Ok(())
 }
 
-fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
+fn handle_window_event(_window: &mut glfw::Window, event: glfw::WindowEvent) {
     match event {
-        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-            window.set_should_close(true);
+        glfw::WindowEvent::Key(key, _, action, _) => {
+            keyboard::key_event(key, action);
         }
         _ => {}
     }

@@ -26,3 +26,12 @@ pub const QUAD: Primitive = Primitive {
     },
 };
 
+pub const NONE: Primitive = Primitive {
+    vert_count: 0,
+    index_count: 0,
+    gl_prim: 0,
+    gen_indices: |_, _| {
+        eprintln!("Attempted index buffering on NONE primitive.");
+    },
+};
+

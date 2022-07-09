@@ -6,7 +6,7 @@ Renderer:
 - [x] First triangle
 - [x] Shader system
 - [x] Camera
-- [ ] Abstract vertex buffer object
+- [x] Abstract vertex buffer object
 - [x] First quad (as in primitive abstractions)
 - [ ] Data buffers
 - [ ] Textures
@@ -14,12 +14,13 @@ Renderer:
 - [ ] Fonts and text?
 
 Core:
-- [ ] Keyboard io
+- [x] Keyboard io
 - [ ] Mouse io
 - [x] Window config
 - [ ] Renderer config - WIP
 - [x] Misc. config through config.rs
 - [ ] Scenes - this should wait until ecs is working
+- [ ] Blocks - data chunks, primarily for renderer
 
 Misc:
 - [ ] Make README
