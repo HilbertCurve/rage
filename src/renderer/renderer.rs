@@ -7,11 +7,23 @@ use crate::renderer::{
     shader::Shader,
 };
 
+use std::error::Error;
+use std::fmt::{self, Display};
+use std::mem;
 use std::ptr;
 
+#[derive(Debug)]
 pub struct RenderError {
     what: String,
 }
+
+impl Display for RenderError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.what)
+    }
+}
+
+impl Error for RenderError {}
 
 impl RenderError {
     pub fn from(message: &str) -> RenderError {
@@ -51,11 +63,13 @@ pub fn start() {
         ];
 
         DEFAULT_VB.set_layout(&VertexBuffer::DEFAULT_ATTRIBS);
+        DEFAULT_VB.set_primitive(&primitive::QUAD);
         DEFAULT_VB.init(&VB, &IB);
         DEFAULT_VB.bind();
         DEFAULT_VB.refresh();
         DEFAULT_SHADER = Shader::new("assets/shaders/default.vert", "assets/shaders/default.frag");
         DEFAULT_VB.enable_attribs();
+
 
         gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     }
@@ -81,7 +95,12 @@ pub fn update() {
 
         let quad = &primitive::QUAD;
         // ...(vb.prim.gl_prim, vb.prim.index_count * vb.len, gl::UNSIGNED_INT, ptr::null());
-        gl::DrawElements(quad.gl_prim, 12, gl::UNSIGNED_INT, ptr::null());
+        gl::DrawElements(
+            quad.gl_prim,
+            DEFAULT_VB.ib.len() as i32 / mem::size_of::<u32>() as i32,
+            gl::UNSIGNED_INT,
+            ptr::null()
+            );
 
         DEFAULT_VB.disable_attribs();
 

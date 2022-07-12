@@ -1,4 +1,5 @@
 use crate::renderer::primitive;
+use crate::utils::block::Block;
 
 use std::mem;
 
@@ -51,13 +52,13 @@ pub struct VertexBuffer {
     ibo: u32,
     pub layout: Vec<VAttrib>, // should this be a slice???
     pub is_used: bool,
-    prim: primitive::Primitive,
+    prim: &'static primitive::Primitive,
     /// Number of elements to be rendered, as based on vb.len();
     /// The user is responsible for managing the value of this item,
     /// as doing so automatically could lead to UB
     pub size: u32,
-    pub vb: Vec<f32>, // TODO: buf of u8's
-    pub ib: Vec<u32>,
+    pub vb: Block,
+    pub ib: Block,
 }
 
 impl VertexBuffer {
@@ -73,15 +74,19 @@ impl VertexBuffer {
             ibo: 0,
             layout: vec![],
             is_used: false,
-            prim: primitive::NONE,
+            prim: &primitive::NONE,
             size: 0,
-            vb: Vec::new(),
-            ib: Vec::new(),
+            vb: Block::empty(),
+            ib: Block::empty(),
         }
     }
 
     pub fn set_layout(&mut self, slice: &[VAttrib]) {
         self.layout = Vec::from(slice);
+    }
+
+    pub fn set_primitive(&mut self, prim: &'static primitive::Primitive) {
+        self.prim = prim;
     }
 
     pub fn init(&mut self, vb: &[f32], ib: &[u32]) {
@@ -113,8 +118,14 @@ impl VertexBuffer {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
 
-        self.vb = Vec::from(vb);
-        self.ib = Vec::from(ib);
+        self.vb.clear();
+        self.ib.clear();
+        for item in vb {
+            self.vb.push(*item);
+        }
+        for item in ib {
+            self.ib.push(*item);
+        }
     }
 
     pub fn bind(&mut self) {
@@ -144,7 +155,7 @@ impl VertexBuffer {
 
         unsafe {
             // regenerate index buffer to match size, if size has changed
-            for i in 0..self.size { // TODO: automate size and use dirty flags
+            for i in 0..2 { // TODO: automate size and use dirty flags
                 (self.prim.gen_indices)(&mut self.ib, i);
             }
 

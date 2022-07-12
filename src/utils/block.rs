@@ -1,10 +1,13 @@
+use std::any;
 use std::error::Error;
 use std::fmt::{self, Display};
 use std::mem;
+use std::ops::{Index, IndexMut};
 use std::slice;
 
 /// Block: an array of u8's that can be interpreted as
 /// any abstract data type
+#[derive(Debug)]
 pub struct Block {
     data: Vec<u8>,
 }
@@ -27,8 +30,12 @@ impl Display for BlockError {
 }
 
 impl Block {
-    pub fn empty() -> Block {
+    pub const fn empty() -> Block {
         Block { data: vec![] }
+    }
+
+    pub fn clear(&mut self) {
+        self.data = vec![];
     }
 
     #[inline]
@@ -36,23 +43,32 @@ impl Block {
         self.data.len()
     }
 
-    pub unsafe fn get<T: Copy>(&self, offset: usize) -> Result<&mut T, BlockError> {
+    pub unsafe fn get<T: Copy>(&self, offset: usize) -> Result<&T, BlockError> {
         let len: usize = mem::size_of::<T>();
 
-        if offset + len >= self.data.len() {
+        if offset + len > self.data.len() {
             return Err(BlockError::Overflow(offset + len - self.data.len()));
         }
 
-        let mut val: Vec<u8> = Vec::new();
-        for i in 0..len {
-            val.push(self.data[offset + i]);
+        let arr = &self.data[offset];
+
+        let ret = mem::transmute::<&u8, &T>(arr);
+
+        Ok(ret)
+    }
+
+    pub unsafe fn get_mut<T: Copy>(&mut self, offset: usize) -> Result<&mut T, BlockError> {
+        let len: usize = mem::size_of::<T>();
+
+        if offset + len > self.data.len() {
+            return Err(BlockError::Overflow(offset + len - self.data.len()));
         }
 
-        let arr = &val;
-        let arr_c: &mut [u8] = &mut [];
-        arr_c.clone_from_slice(arr);
+        let arr = &mut self.data[offset];
 
-        Ok(&mut *mem::transmute::<* const u8, * mut T>(arr_c.as_ptr()))
+        let ret = mem::transmute::<&mut u8, &mut T>(arr);
+
+        Ok(ret)
     }
 
     pub fn set<T: Copy>(&mut self, offset: usize, val: T) -> Result<(), BlockError> {
@@ -62,7 +78,7 @@ impl Block {
             slice::from_raw_parts(ptr as * const u8, len)
         };
 
-        if offset + len >= self.data.len() {
+        if offset + len > self.data.len() {
             return Err(BlockError::Overflow(offset + len - self.data.len()));
         } else {
             for i in 0..len {
@@ -77,7 +93,9 @@ impl Block {
         let ptr = &val as * const T;
 
         unsafe {
-            self.data.extend(slice::from_raw_parts(ptr as * const u8, len));
+            let ext = slice::from_raw_parts(ptr as * mut u8, len);
+
+            self.data.extend(ext);
         }
     }
 
@@ -97,6 +115,45 @@ impl Block {
         self.data.truncate(self.data.len() - len);
 
         Ok(*mem::transmute::<* const u8, * const T>(arr_c.as_ptr()))
+    }
+
+    #[inline]
+    pub fn as_ptr(&self) -> *const u8 {
+        self.data.as_ptr()
+    }
+
+    // this function doesn't mutate self
+    pub fn print<T: Copy + Display>(&self) {
+        // header
+        println!("Data block at heap address {:p} as {} {{", self.as_ptr(), any::type_name::<T>());
+        let d_len = self.data.len();
+        let e_len = mem::size_of::<T>();
+
+        let count = (d_len / e_len) as usize;
+
+        // data
+        for i in 0..count {
+            unsafe {
+                println!("    {},", self.get::<T>(i * e_len).expect("this shouldn't happen"));
+            }
+        }
+
+        // footer
+        println!("}}");
+    }
+}
+
+impl Index<usize> for Block {
+    type Output = u8;
+
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.data[i]
+    }
+}
+
+impl IndexMut<usize> for Block {
+    fn index_mut(&mut self, i: usize) -> &mut u8 {
+        &mut self.data[i]
     }
 }
 

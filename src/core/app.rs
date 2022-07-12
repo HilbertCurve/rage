@@ -1,7 +1,7 @@
 extern crate gl;
 extern crate glfw;
 
-use glfw::Context;
+use glfw::{Action, Context, Key};
 use crate::renderer;
 use super::config::*;
 use super::keyboard;
@@ -84,8 +84,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn handle_window_event(_window: &mut glfw::Window, event: glfw::WindowEvent) {
+fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
     match event {
+        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
+            window.set_should_close(true);
+        }
         glfw::WindowEvent::Key(key, _, action, _) => {
             keyboard::key_event(key, action);
         }

@@ -8,7 +8,7 @@ Renderer:
 - [x] Camera
 - [x] Abstract vertex buffer object
 - [x] First quad (as in primitive abstractions)
-- [ ] Data buffers
+- [x] Data buffers
 - [ ] Textures
 - [ ] Polished renderer
 - [ ] Fonts and text?
@@ -20,7 +20,10 @@ Core:
 - [ ] Renderer config - WIP
 - [x] Misc. config through config.rs
 - [ ] Scenes - this should wait until ecs is working
-- [ ] Blocks - data chunks, primarily for renderer
+- [x] Blocks - data chunks, primarily for renderer
+
+Tests:
+- [ ] More block tests; edge cases
 
 Misc:
 - [ ] Make README
