@@ -1,10 +1,14 @@
 extern crate gl;
 extern crate glfw;
 
+#[allow(unused)]
 use glfw::{Action, Context, Key};
+#[deny(unused)]
+
 use crate::renderer;
 use super::config::*;
 use super::keyboard;
+use super::mouse;
 
 use std::sync::mpsc::Receiver;
 
@@ -38,6 +42,9 @@ fn init() -> Result<GlfwConf, String> {
         glfw::WindowMode::Windowed)
         .ok_or("Could not initialize GLFW window.".to_owned())?;
     window.set_key_polling(true);
+    window.set_mouse_button_polling(true);
+    window.set_cursor_pos_polling(true);
+    window.set_scroll_polling(true);
     window.make_current();
 
     inst.default_window_hints();
@@ -59,6 +66,7 @@ fn init() -> Result<GlfwConf, String> {
     Ok((inst, window, events))
 }
 
+use crate::renderer::texture::Spritesheet;
 /// Initializes and runs program, consuming inputted configuration object.
 pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     // set config
@@ -66,6 +74,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
 
     // game loop, as specified by current scene
     let (mut glfw, mut window, events) = init()?;
+        let _sheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)
+            .expect("rage-quit");
     while !window.should_close() {
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
@@ -75,7 +85,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
         renderer::update();
  
         if keyboard::is_pressed(glfw::Key::A) {
-            println!("d");
+            println!("{:?}", mouse::pos());
+        }
+        if mouse::is_pressed(glfw::MouseButton::Button1) {
+            println!("Pressed");
         }
 
         window.swap_buffers();
@@ -84,13 +97,19 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
+fn handle_window_event(_window: &mut glfw::Window, event: glfw::WindowEvent) {
     match event {
-        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-            window.set_should_close(true);
-        }
         glfw::WindowEvent::Key(key, _, action, _) => {
             keyboard::key_event(key, action);
+        }
+        glfw::WindowEvent::MouseButton(button, action, _) => {
+            mouse::mouse_button_event(button, action);
+        }
+        glfw::WindowEvent::CursorPos(x, y) => {
+            mouse::mouse_pos_event(x, y);
+        }
+        glfw::WindowEvent::Scroll(x, y) => {
+            mouse::mouse_scroll_event(x, y);
         }
         _ => {}
     }

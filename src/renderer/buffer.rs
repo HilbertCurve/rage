@@ -7,7 +7,7 @@ use std::mem;
 pub enum VProp {
     Position,
     Color,
-    TexCoords,
+    TexUV,
     TexID,
     Other,
 }
@@ -62,9 +62,11 @@ pub struct VertexBuffer {
 }
 
 impl VertexBuffer {
-    pub const DEFAULT_ATTRIBS: [VAttrib; 2] = [
+    pub const DEFAULT_ATTRIBS: [VAttrib; 4] = [
         VAttrib { v_prop: VProp::Position, v_type: VType::Float, v_count: 3 },
         VAttrib { v_prop: VProp::Color, v_type: VType::Float, v_count: 4 },
+        VAttrib { v_prop: VProp::TexUV, v_type: VType::Float, v_count: 2 },
+        VAttrib { v_prop: VProp::TexID, v_type: VType::Float, v_count: 1 },
     ];
 
     pub const fn new() -> VertexBuffer {

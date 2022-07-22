@@ -13,6 +13,7 @@ pub struct Shader {
 }
 
 impl Shader {
+    // TODO: make this return Result<Shader, Box<dyn Error>>
     pub fn new(vert_path: &str, frag_path: &str) -> Shader {
         let mut vert_code = fs::read_to_string(vert_path)
             .expect("Better errors, please!");

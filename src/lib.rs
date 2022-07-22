@@ -1,4 +1,8 @@
+#[macro_use]
+extern crate lazy_static;
+
 pub mod core;
+pub mod ecs;
 pub mod renderer;
 pub mod utils;
 // re-exports here
@@ -45,12 +49,15 @@ impl Renderable for Rect {
 mod tests {
     use super::*;
     use super::utils::Block;
+    use super::renderer::texture::Spritesheet;
 
     #[test]
     fn it_works() {
         let mut _rect: Rect;
         let mut config: core::Config = core::Config::default();
         config.window_height = 600;
+
+
         core::run(config).expect("rage-quit");
     }
 

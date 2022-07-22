@@ -15,18 +15,25 @@ Renderer:
 
 Core:
 - [x] Keyboard io
-- [ ] Mouse io
+- [x] Mouse io
 - [x] Window config
 - [ ] Renderer config - WIP
 - [x] Misc. config through config.rs
 - [ ] Scenes - this should wait until ecs is working
 - [x] Blocks - data chunks, primarily for renderer
 
+ECS:
+- [ ] Game objects
+- [ ] Components
+- [ ] Basic sprite renderer
+
 Tests:
 - [ ] More block tests; edge cases
 
 Misc:
 - [ ] Make README
+- [ ] Tons of documentation lmao
+- [ ] Proper re-exports: certain components really shouldn't be exposed, at least without using the `rage::ext` module; other components have no function outside of the engine (like globals) and shouldn't be exposed at all
 
 Known bugs:
 - [ ] Fix gl::Viewport; currently items clip off of the screen easily

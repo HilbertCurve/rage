@@ -117,12 +117,24 @@ impl Block {
         Ok(*mem::transmute::<* const u8, * const T>(arr_c.as_ptr()))
     }
 
+    pub fn push_vec<T: Copy>(&mut self, vec: Vec<T>) {
+        for e in vec {
+            self.push::<T>(e);
+        }
+    }
+
+    pub fn from_vec<T: Copy>(vec: &Vec<T>) -> Block {
+        let mut ret: Block = Block::empty();
+        ret.push_vec(vec.clone());
+
+        ret
+    }
+
     #[inline]
     pub fn as_ptr(&self) -> *const u8 {
         self.data.as_ptr()
     }
 
-    // this function doesn't mutate self
     pub fn print<T: Copy + Display>(&self) {
         // header
         println!("Data block at heap address {:p} as {} {{", self.as_ptr(), any::type_name::<T>());
