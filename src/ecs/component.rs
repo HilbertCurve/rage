@@ -1,18 +1,23 @@
 use super::go::Go;
 
-use std::rc::Weak;
-
 pub enum ComponentError {
     InvalidParent,
     InvalidOp,
     AlreadyPresent,
+    NotPresent,
 }
 
-pub trait Component {
-    fn parent(&mut self) -> Weak<Go>;
-    fn set_parent(&mut self, go: &Go);
-    fn start(&mut self);
-    fn update(&mut self);
-    fn type_enum(&self) -> String;
+#[derive(PartialEq)]
+pub enum ComponentEnum {
+    SpriteRenderer,
+    Transform,
+    TextRenderer,
+    Custom(String),
+}
+
+pub trait Component: 'static {
+    fn start(&self, parent: &Go);
+    fn update(&self, parent: &Go);
+    fn type_enum(&self) -> ComponentEnum;
 }
 

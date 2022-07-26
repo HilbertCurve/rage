@@ -37,18 +37,18 @@ impl RenderError {
 }
 
 pub trait Renderable {
-    fn to_buffer(buf: &mut VertexBuffer, pos: u32) -> Result<(), RenderError>;
+    fn to_buffer(&self, buf: &mut VertexBuffer, pos: u32) -> Result<(), RenderError>;
 }
 
 const VB: [f32; 80] = [
-    0.0, 0.0, -10.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-    0.0, 0.5, -10.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-    0.5, 0.5, -10.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-    0.5, 0.0, -10.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-    0.5, 0.5, -10.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0,
-    0.5, 1.0, -10.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-    1.0, 1.0, -10.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-    1.0, 0.5, -10.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
+    0.0, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+    0.5, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+    0.5, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
+    0.5, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
+    0.5, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+    1.0, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+    1.0, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
 ];
 
 static mut IB: Vec<u32> = vec![];
@@ -89,6 +89,10 @@ pub fn update() {
         DEFAULT_VB.refresh();
 
         // attach textures
+        for tex in &*TEX_POOL.try_lock().unwrap() {
+            gl::ActiveTexture(gl::TEXTURE0 + tex.get_id());
+            gl::BindTexture(gl::TEXTURE_2D, tex.get_id());
+        }
 
         // shader stuff
         DEFAULT_SHADER.attach();
@@ -112,5 +116,9 @@ pub fn update() {
         DEFAULT_SHADER.detach();
 
         // detach textures
+        for tex in &*TEX_POOL.try_lock().unwrap() {
+            gl::ActiveTexture(gl::TEXTURE0 + tex.get_id());
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+        }
     }
 }

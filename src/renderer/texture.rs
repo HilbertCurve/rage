@@ -70,7 +70,7 @@ impl Spritesheet {
         Ok(Spritesheet { id, src: src.clone(), width, height, s_width, s_height, padding })
     }
 
-    pub fn get(&self, index: usize) -> Texture {
+    pub fn get_texture(&self, index: usize) -> Texture {
         // get offset from top
         let from_top = ((index as f32 * self.s_width as f32 / self.width as f32)
                         * (self.s_height as f32 + self.padding as f32)).floor() as u32;
@@ -97,6 +97,14 @@ impl Spritesheet {
         ];
 
         Texture { id: self.id, coords }
+    }
+
+    pub fn get_id(&self) -> u32 {
+        self.id
+    }
+
+    pub fn get_source(&self) -> &str {
+        &self.src
     }
 }
 

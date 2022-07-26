@@ -2,17 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7e1a1bd-ffd4-4e0d-a573-435fc1f805c1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/roadmap.md" beforeDir="false" afterPath="$PROJECT_DIR$/roadmap.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/app.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/keyboard.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/keyboard.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/mouse.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/mouse.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/renderer/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/texture.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/texture.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="2CBCQpS6lexLStvdKpqKYRpdthu" />
   <component name="ProjectViewState">
@@ -24,12 +23,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true"
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/home/ben/IdeaProjects/Azurite"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
+      <changelist id="c7e1a1bd-ffd4-4e0d-a573-435fc1f805c1" name="Changes" comment="" />
       <created>1658266584298</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />

@@ -9,7 +9,7 @@ Renderer:
 - [x] Abstract vertex buffer object
 - [x] First quad (as in primitive abstractions)
 - [x] Data buffers
-- [ ] Textures
+- [x] Textures
 - [ ] Polished renderer
 - [ ] Fonts and text?
 
