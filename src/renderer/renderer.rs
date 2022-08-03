@@ -37,7 +37,7 @@ impl RenderError {
 }
 
 pub trait Renderable {
-    fn to_buffer(&self, buf: &mut VertexBuffer) -> Result<(), RenderError>;
+    fn to_buffer(&self, buf: &mut VertexBuffer, pos: u32) -> Result<(), RenderError>;
 }
 
 const VB: [f32; 80] = [
@@ -54,7 +54,7 @@ const VB: [f32; 80] = [
 static mut IB: Vec<u32> = vec![];
 
 static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
-pub static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
+static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
 
 pub fn start() {
     unsafe {

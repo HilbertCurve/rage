@@ -1,49 +1,36 @@
-extern crate rage_macros;
-
-use rage_macros::*;
-
-use glam::{Vec2, Vec4};
+use glam::Vec4;
 
 use crate::ecs::{
-    component::{Component, ComponentError},
-    entity::Entity,
-    transform::Transform,
+    component::{Component, ComponentEnum},
+    go::Go,
 };
 use crate::renderer::{
     buffer::VertexBuffer,
-    renderer::{DEFAULT_VB, Renderable, RenderError},
+    renderer::{Renderable, RenderError},
     texture::Texture,
 };
 
-#[derive(Component)]
 pub struct SpriteRenderer {
-    pub color: Vec4,
-    pub texture: Texture,
-    pos_cache: Vec2,
+    color: Vec4,
+    texture: Texture,
 }
 
-impl SpriteRenderer {
-    pub fn new(color: Vec4, texture: Texture) -> SpriteRenderer {
-        SpriteRenderer { color, texture, pos_cache: Vec2::new(0.0, 0.0)}
+impl Component for SpriteRenderer {
+    // you never call these directly; these are called automatically by the parent game object
+    fn start(&self, parent: &Go) {
+
     }
-    pub fn update(&mut self, parent: &'static Entity) -> Result<(), ComponentError> {
-        // find position of go, if it has transform
-        let trans = parent.get::<Transform>()?;
+    fn update(&self, parent: &Go) {
 
-        self.pos_cache = trans.pos;
-
-        unsafe {
-            if let Err(err) = self.to_buffer(&mut DEFAULT_VB) {
-                Err(ComponentError::BadUpdate(format!("Received render error: {:?}", err)))
-            } else {
-                Ok(())
-            }
-        }
+    }
+    fn type_enum(&self) -> ComponentEnum {
+        ComponentEnum::SpriteRenderer
     }
 }
 
 impl Renderable for SpriteRenderer {
-    fn to_buffer(&self, buf: &mut VertexBuffer) -> Result<(), RenderError> {
+    fn to_buffer(&self, buf: &mut VertexBuffer, pos: u32) -> Result<(), RenderError> {
+        // ensure parent has Transform component
 
         Ok(())
     }

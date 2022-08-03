@@ -23,13 +23,9 @@ Core:
 - [x] Blocks - data chunks, primarily for renderer
 
 ECS:
-- [x] Entities
-- [x] Components
-- [x] Component derive macro
-- [ ] Core components, like transform
-- [ ] SpriteRenderer - to test out renderer system
-- [ ] Collider - to test future physics system
-- [ ] ModelRenderer - to test future 3d renderer system
+- [ ] Game objects
+- [ ] Components
+- [ ] Basic sprite renderer
 
 Tests:
 - [ ] More block tests; edge cases
@@ -37,7 +33,7 @@ Tests:
 Misc:
 - [ ] Make README
 - [ ] Tons of documentation lmao
-- [ ] Proper re-exports: certain parts really shouldn't be exposed, at least without using the `rage::ext` module; other parts have no function outside of the engine (like globals) and shouldn't be exposed at all
+- [ ] Proper re-exports: certain components really shouldn't be exposed, at least without using the `rage::ext` module; other components have no function outside of the engine (like globals) and shouldn't be exposed at all
 
 Known bugs:
 - [ ] Fix gl::Viewport; currently items clip off of the screen easily
