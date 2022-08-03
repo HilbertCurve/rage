@@ -1,23 +1,14 @@
-use super::go::Go;
-
 pub enum ComponentError {
     InvalidParent,
     InvalidOp,
-    AlreadyPresent,
-    NotPresent,
-}
-
-#[derive(PartialEq)]
-pub enum ComponentEnum {
-    SpriteRenderer,
-    Transform,
-    TextRenderer,
-    Custom(String),
+    AlreadyPresent(String),
+    NotPresent(String),
+    BadUpdate(String),
 }
 
 pub trait Component: 'static {
-    fn start(&self, parent: &Go);
-    fn update(&self, parent: &Go);
-    fn type_enum(&self) -> ComponentEnum;
+    fn as_any(&self) -> &dyn std::any::Any;
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
+    fn type_str() -> &'static str where Self: Sized;
 }
 
