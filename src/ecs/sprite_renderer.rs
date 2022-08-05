@@ -16,13 +16,7 @@ pub struct SpriteRenderer {
 }
 
 impl Component for SpriteRenderer {
-    // you never call these directly; these are called automatically by the parent game object
-    fn start(&self, parent: &Go) {
 
-    }
-    fn update(&self, parent: &Go) {
-
-    }
     fn type_enum(&self) -> ComponentEnum {
         ComponentEnum::SpriteRenderer
     }
@@ -30,7 +24,7 @@ impl Component for SpriteRenderer {
 
 impl Renderable for SpriteRenderer {
     fn to_buffer(&self, buf: &mut VertexBuffer, pos: u32) -> Result<(), RenderError> {
-        // ensure parent has Transform component
+        // agh, so much work gone...
 
         Ok(())
     }

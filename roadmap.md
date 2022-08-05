@@ -23,8 +23,10 @@ Core:
 - [x] Blocks - data chunks, primarily for renderer
 
 ECS:
-- [ ] Game objects
+- [ ] Entities
 - [ ] Components
+- [ ] Dynamic components
+- [ ] Scenes
 - [ ] Basic sprite renderer
 
 Tests:

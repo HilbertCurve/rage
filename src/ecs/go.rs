@@ -1,9 +1,12 @@
 use super::component::{Component, ComponentEnum, ComponentError};
 
+// TODO: rename to entity
 pub struct Go {
     components: Vec<Box<dyn Component>>,
 }
 
+// TODO: add, remove, detach, integrate DynComponent, use as_any and as_any_mut, implement
+// component macro
 impl Go {
     pub fn attach<T: Component + Copy>(&'static mut self, com: T) -> Result<(), ComponentError> {
         // ensure component of type T doesn't exist yet

@@ -15,9 +15,15 @@ pub enum ComponentEnum {
     Custom(String),
 }
 
+// TODO: as_any and as_any_mut
 pub trait Component: 'static {
-    fn start(&self, parent: &Go);
-    fn update(&self, parent: &Go);
+
     fn type_enum(&self) -> ComponentEnum;
+}
+
+// TODO: set_parent, detach, update
+pub trait DynComponent: 'static + Component {
+    fn get_parent(&mut self) -> Option<&Entity>;
+
 }
 
