@@ -1,9 +1,10 @@
 use crate::renderer::primitive;
+use crate::renderer::renderer::RenderError;
 use crate::utils::block::Block;
 
 use std::mem;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VProp {
     Position,
     Color,
@@ -12,7 +13,7 @@ pub enum VProp {
     Other,
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VType {
     Byte,
     UByte,
@@ -157,7 +158,7 @@ impl VertexBuffer {
 
         unsafe {
             // regenerate index buffer to match size, if size has changed
-            for i in 0..2 { // TODO: automate size and use dirty flags
+            for i in 0..self.size { // TODO: automate size and use dirty flags
                 (self.prim.gen_indices)(&mut self.ib, i);
             }
 
@@ -176,11 +177,30 @@ impl VertexBuffer {
         }
     }
 
-    fn layout_len(&self) -> u32 {
+    pub fn clear(&mut self) {
+        self.vb.clear();
+        self.ib.clear();
+        self.size = 0;
+    }
+
+    pub fn layout_len(&self) -> u32 {
         self.layout.iter().try_fold(
             0u32,
             |acc, x| acc.checked_add(x.v_type.size_bytes() as u32 * x.v_count)
             ).expect("who knows what went wrong")
+    }
+    
+    pub fn attrib_metadata(&self, prop: VProp) -> Result<(usize, usize, VType), RenderError> {
+        let mut acc: usize = 0;
+        for attrib in self.layout {
+            if attrib.v_prop == prop {
+                return Ok((acc, attrib.v_count as usize, attrib.v_type));
+            } else {
+                acc += attrib.v_count as usize;
+            }
+        }
+
+        Err(RenderError::from(&format!("attribute {:?} not found", prop)))
     }
 
     pub fn enable_attribs(&mut self) {

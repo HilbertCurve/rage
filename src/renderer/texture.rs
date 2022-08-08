@@ -7,8 +7,8 @@ use crate::utils::error::UnsupportedError;
 use std::error;
 
 pub struct Texture {
-    id: u32,
-    coords: [f32; 8],
+    pub id: u32,
+    pub uvs: [f32; 8],
 }
 
 pub struct Spritesheet {
@@ -96,7 +96,7 @@ impl Spritesheet {
             pos2.0, pos2.1    
         ];
 
-        Texture { id: self.id, coords }
+        Texture { id: self.id, uvs: coords }
     }
 
     pub fn get_id(&self) -> u32 {

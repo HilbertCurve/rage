@@ -71,6 +71,7 @@ impl Block {
         Ok(ret)
     }
 
+    /// Offset is the offset in bytes
     pub fn set<T: Copy>(&mut self, offset: usize, val: T) -> Result<(), BlockError> {
         let len: usize = mem::size_of::<T>();
         let data = unsafe {

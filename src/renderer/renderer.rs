@@ -8,7 +8,6 @@ use crate::renderer::{
 
 use std::error::Error;
 use std::fmt::{self, Display};
-use std::mem;
 use std::ptr;
 use std::sync::Mutex;
 
@@ -36,8 +35,14 @@ impl RenderError {
     }
 }
 
+// TODO: render targets; no more `pub static VertexBuffer`s
+pub enum RenderTarget {
+    Sprite,
+    Model,
+}
+
 pub trait Renderable {
-    fn to_buffer(&self, buf: &mut VertexBuffer, pos: u32) -> Result<(), RenderError>;
+    fn to_buffer(&self, buf: &mut VertexBuffer) -> Result<(), RenderError>;
 }
 
 const VB: [f32; 80] = [
@@ -54,7 +59,7 @@ const VB: [f32; 80] = [
 static mut IB: Vec<u32> = vec![];
 
 static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
-static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
+pub static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
 
 pub fn start() {
     unsafe {
@@ -105,7 +110,7 @@ pub fn update() {
         let quad = &primitive::QUAD;
         gl::DrawElements(
             quad.gl_prim,
-            DEFAULT_VB.ib.len() as i32 / mem::size_of::<u32>() as i32,
+            DEFAULT_VB.size as i32,
             gl::UNSIGNED_INT,
             ptr::null()
             );
@@ -113,6 +118,7 @@ pub fn update() {
         DEFAULT_VB.disable_attribs();
 
         DEFAULT_VB.unbind();
+        DEFAULT_VB.clear();
         DEFAULT_SHADER.detach();
 
         // detach textures

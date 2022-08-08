@@ -23,11 +23,14 @@ Core:
 - [x] Blocks - data chunks, primarily for renderer
 
 ECS:
-- [ ] Entities
-- [ ] Components
-- [ ] Dynamic components
+- [x] Entities
+- [x] Components
+- [x] Component derive
+- [ ] Basic components - transform, etc
+- [x] Dynamic components
 - [ ] Scenes
 - [ ] Basic sprite renderer
+- [ ] Tests
 
 Tests:
 - [ ] More block tests; edge cases
@@ -36,6 +39,7 @@ Misc:
 - [ ] Make README
 - [ ] Tons of documentation lmao
 - [ ] Proper re-exports: certain components really shouldn't be exposed, at least without using the `rage::ext` module; other components have no function outside of the engine (like globals) and shouldn't be exposed at all
+- [ ] ChainError - an error with a `cause` field, which is another ChainError; similar to Cons list
 
 Known bugs:
 - [ ] Fix gl::Viewport; currently items clip off of the screen easily
