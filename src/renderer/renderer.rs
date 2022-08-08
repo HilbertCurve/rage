@@ -45,19 +45,6 @@ pub trait Renderable {
     fn to_buffer(&self, buf: &mut VertexBuffer) -> Result<(), RenderError>;
 }
 
-const VB: [f32; 80] = [
-    0.0, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
-    0.0, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-    0.5, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-    0.5, 0.0, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-    0.5, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
-    0.5, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-    1.0, 1.0, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-    1.0, 0.5, -10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-];
-
-static mut IB: Vec<u32> = vec![];
-
 static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
 pub static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
 
@@ -65,21 +52,14 @@ pub fn start() {
     unsafe {
         // this spot is for initializing default vertex buf, data buf,
         // and shader, along with some gl settings
-        IB = vec![
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-        ];
 
         DEFAULT_VB.set_layout(&VertexBuffer::DEFAULT_ATTRIBS);
         DEFAULT_VB.set_primitive(&primitive::QUAD);
-        DEFAULT_VB.init(&VB, &IB);
+        DEFAULT_VB.init(&[0.0; 0], &[0; 0]);
         DEFAULT_VB.bind();
         DEFAULT_VB.refresh();
         DEFAULT_SHADER = Shader::new("assets/shaders/default.vert", "assets/shaders/default.frag");
         DEFAULT_VB.enable_attribs();
-
 
         gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     }
@@ -110,10 +90,11 @@ pub fn update() {
         let quad = &primitive::QUAD;
         gl::DrawElements(
             quad.gl_prim,
-            DEFAULT_VB.size as i32,
+            DEFAULT_VB.ib.len() as i32 / std::mem::size_of::<u32>() as i32,
             gl::UNSIGNED_INT,
             ptr::null()
             );
+        DEFAULT_VB.vb.print::<f32>();
 
         DEFAULT_VB.disable_attribs();
 
@@ -128,3 +109,4 @@ pub fn update() {
         }
     }
 }
+

@@ -5,6 +5,10 @@ pub struct Entity {
 }
 
 impl Entity {
+    pub fn new() -> Entity {
+        Entity { components: vec![] }
+    }
+
     pub fn add<T: Component>(&mut self, com: T) -> Result<(), ComponentError> {
         // ensure component of type T doesn't exist yet
         for g_com in &mut self.components {

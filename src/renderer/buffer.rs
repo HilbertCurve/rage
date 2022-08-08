@@ -157,8 +157,8 @@ impl VertexBuffer {
         }
 
         unsafe {
-            // regenerate index buffer to match size, if size has changed
-            for i in 0..self.size { // TODO: automate size and use dirty flags
+            self.ib.resize(self.size as usize * self.layout_len() as usize);
+            for i in 0..self.size { // TODO: use dirty flags
                 (self.prim.gen_indices)(&mut self.ib, i);
             }
 
@@ -192,7 +192,7 @@ impl VertexBuffer {
     
     pub fn attrib_metadata(&self, prop: VProp) -> Result<(usize, usize, VType), RenderError> {
         let mut acc: usize = 0;
-        for attrib in self.layout {
+        for attrib in &self.layout {
             if attrib.v_prop == prop {
                 return Ok((acc, attrib.v_count as usize, attrib.v_type));
             } else {

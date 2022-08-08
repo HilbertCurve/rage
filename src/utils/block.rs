@@ -30,12 +30,19 @@ impl Display for BlockError {
 }
 
 impl Block {
+    #[inline]
     pub const fn empty() -> Block {
         Block { data: vec![] }
     }
 
+    #[inline]
     pub fn clear(&mut self) {
         self.data = vec![];
+    }
+
+    #[inline]
+    pub fn resize(&mut self, size: usize) {
+        self.data.resize(size, 0u8);
     }
 
     #[inline]

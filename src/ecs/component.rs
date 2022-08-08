@@ -2,12 +2,30 @@ pub use rage_macros::Component as component_derive;
 
 use super::entity::Entity;
 
+use std::error::Error;
+use std::fmt::{self, Display, Formatter};
+
+#[derive(Debug)]
 pub enum ComponentError {
     InvalidParent,
     InvalidOp,
     AlreadyPresent(String),
     NotPresent(String),
     BadUpdate(String),
+}
+
+impl Error for ComponentError {  }
+
+impl Display for ComponentError {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::InvalidParent => write!(f, "invalid parent"),
+            Self::InvalidOp => write!(f, "invalid operation"),
+            Self::AlreadyPresent(t) => write!(f, "component already present: {}", t),
+            Self::NotPresent(t) => write!(f, "component not present: {}", t),
+            Self::BadUpdate(what) => write!(f, "component had a bad update: {}", what),
+        }
+    }
 }
 
 pub trait Component: 'static {

@@ -43,8 +43,7 @@ impl DynComponent for SpriteRenderer {
         self.parent = std::ptr::null();
     }
     fn update(&mut self) -> Result<(), ComponentError> {
-        let res = unsafe { self.to_buffer(&mut DEFAULT_VB) };
-        if let Err(err) = res {
+        if let Err(err) = unsafe { self.to_buffer(&mut DEFAULT_VB) } {
             Err(ComponentError::BadUpdate(format!("Buffering failed: {}", err)))
         } else {
             Ok(())
@@ -66,7 +65,7 @@ impl Renderable for SpriteRenderer {
         let (pos_pos, pos_size, pos_type_enum) = buf.attrib_metadata(VProp::Position)?;
         let (col_pos, col_size, col_type_enum) = buf.attrib_metadata(VProp::Color)?;
         let (tuv_pos, tuv_size, tuv_type_enum) = buf.attrib_metadata(VProp::TexUV)?;
-        let (tid_pos, tid_size, tid_type_enum) = buf.attrib_metadata(VProp::TexID)?;
+        let (tid_pos, _, tid_type_enum) = buf.attrib_metadata(VProp::TexID)?;
         if pos_size < 3 || pos_type_enum != VType::Float {
             return Err(RenderError::from(
                     &format!("bad position layout, got {} of type {:?}", pos_size, pos_type_enum)));
@@ -84,7 +83,6 @@ impl Renderable for SpriteRenderer {
                     &format!("bad tex id layout, got {} of type {:?}", tuv_size, tuv_type_enum)));
         }
 
-        // TODO: for each corner...
         let corners: [Vec3; 4] = [
             trans.pos + Vec3::new( trans.whd.x,  trans.whd.y, 0.0) / 2.0,
             trans.pos + Vec3::new(-trans.whd.x,  trans.whd.y, 0.0) / 2.0,
@@ -95,6 +93,7 @@ impl Renderable for SpriteRenderer {
         let mut acc = 0;
         for corner in corners {
             // buffer vertex
+
             // NOTE: it's ok to set a float to 0x00000000, that evaluates to 0.0
             for _ in 0..buf.layout_len() {
                 buf.vb.push(0u8);
@@ -102,26 +101,32 @@ impl Renderable for SpriteRenderer {
 
             for i in 0..3 {
                 buf.vb.set(
-                    offset + (pos_pos + i * pos_size) * pos_type_enum.size_bytes(),
-                    corner[i]);
+                    offset + (pos_pos + i) * pos_type_enum.size_bytes(),
+                    corner[i])
+                    .or(Err(RenderError::from(&format!("bad block insertion"))))?;
             }
             for i in 0..4 {
                 buf.vb.set(
-                    offset + (col_pos + i * col_size) * col_type_enum.size_bytes(),
-                    self.color[i]);
+                    offset + (col_pos + i) * col_type_enum.size_bytes(),
+                    self.color[i])
+                    .or(Err(RenderError::from(&format!("bad block insertion"))))?;
             }
-            for i in acc..acc+2 {
+            for i in 0..2 {
                 buf.vb.set(
-                    offset + (tuv_pos + i * tuv_size) * tuv_type_enum.size_bytes(),
-                    self.texture.uvs[i]);
+                    offset + (tuv_pos + i) * tuv_type_enum.size_bytes(),
+                    self.texture.uvs[acc+i])
+                    .or(Err(RenderError::from(&format!("bad block insertion"))))?;
             }
             buf.vb.set(
                 offset + tid_pos * tid_type_enum.size_bytes(),
-                self.texture.id);
+                self.texture.id as f32)
+                .or(Err(RenderError::from(&format!("bad block insertion"))))?;
 
             offset += buf.layout_len() as usize;
             acc += 2;
         }
+
+        buf.size += 2;
 
         Ok(())
     }

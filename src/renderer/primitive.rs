@@ -19,11 +19,11 @@ pub const QUAD: Primitive = Primitive {
         let offset: usize = location as usize * 6 * mem::size_of::<u32>();
         let index: u32 = location * 4;
 
-        elements.set::<u32>(offset + 0,  0 + index)
+        elements.set::<u32>(offset + 0,  3 + index)
             .expect(&format!("not enough space: failed on offset {}", offset + 0));
-        elements.set::<u32>(offset + 4,  3 + index)
+        elements.set::<u32>(offset + 4,  2 + index)
             .expect(&format!("not enough space: failed on offset {}", offset + 4));
-        elements.set::<u32>(offset + 8,  2 + index)
+        elements.set::<u32>(offset + 8,  0 + index)
             .expect(&format!("not enough space: failed on offset {}", offset + 8));
 
         elements.set::<u32>(offset + 12, 0 + index)

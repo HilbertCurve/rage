@@ -13,22 +13,22 @@ extern crate glam;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use super::utils::Block;
+    use super::core::prelude::*;
+    use super::utils::block::{Block, BlockError};
     use super::renderer::texture::Spritesheet;
 
     #[test]
     fn it_works() {
-        let mut config: core::Config = core::Config::default();
+        let mut config: Config = Config::default();
         config.window_height = 600;
 
 
-        core::run(config).expect("rage-quit");
+        app::run(config).expect("rage-quit");
     }
 
     #[test]
-    fn block_test_push_pop() -> Result<(), utils::BlockError> {
-        let mut block: utils::Block = utils::Block::empty();
+    fn block_test_push_pop() -> Result<(), BlockError> {
+        let mut block: Block = Block::empty();
         block.push(4u32);
 
         let val: u32 = unsafe {
@@ -57,7 +57,7 @@ mod tests {
     }
 
     #[test]
-    fn block_test_get_set() -> Result<(), utils::BlockError> {
+    fn block_test_get_set() -> Result<(), BlockError> {
         let mut block: Block = Block::empty();
         let u32_size: usize = std::mem::size_of::<u32>() as usize;
 

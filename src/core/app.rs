@@ -5,10 +5,8 @@ extern crate glfw;
 use glfw::{Action, Context, Key};
 #[deny(unused)]
 
-use crate::renderer;
-use super::config::*;
-use super::keyboard;
-use super::mouse;
+use crate::renderer::renderer;
+use crate::core::{self, prelude::*};
 
 use std::sync::mpsc::Receiver;
 
@@ -66,7 +64,9 @@ fn init() -> Result<GlfwConf, String> {
     Ok((inst, window, events))
 }
 
+use glam::*;
 use crate::renderer::texture::Spritesheet;
+use crate::ecs::prelude::*;
 /// Initializes and runs program, consuming inputted configuration object.
 pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     // set config
@@ -74,14 +74,21 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
 
     // game loop, as specified by current scene
     let (mut glfw, mut window, events) = init()?;
-        let _sheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)
-            .expect("rage-quit");
+    let sheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
+
+    let mut player: Entity = Entity::new();
+    let r_player = SpriteRenderer::from(Vec4::new(1.0, 1.0, 1.0, 1.0), sheet.get_texture(0));
+
+    player.add(Transform::from(Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0)))?;
+    player.attach(r_player)?;
+
     while !window.should_close() {
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
             handle_window_event(&mut window, event);
         }
- 
+
+        player.update::<SpriteRenderer>()?;
         renderer::update();
  
         if keyboard::is_pressed(glfw::Key::A) {
@@ -100,16 +107,16 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
 fn handle_window_event(_window: &mut glfw::Window, event: glfw::WindowEvent) {
     match event {
         glfw::WindowEvent::Key(key, _, action, _) => {
-            keyboard::key_event(key, action);
+            core::keyboard::key_event(key, action);
         }
         glfw::WindowEvent::MouseButton(button, action, _) => {
-            mouse::mouse_button_event(button, action);
+            core::mouse::mouse_button_event(button, action);
         }
         glfw::WindowEvent::CursorPos(x, y) => {
-            mouse::mouse_pos_event(x, y);
+            core::mouse::mouse_pos_event(x, y);
         }
         glfw::WindowEvent::Scroll(x, y) => {
-            mouse::mouse_scroll_event(x, y);
+            core::mouse::mouse_scroll_event(x, y);
         }
         _ => {}
     }
