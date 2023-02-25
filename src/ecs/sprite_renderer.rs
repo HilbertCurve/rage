@@ -28,6 +28,8 @@ impl SpriteRenderer {
     }
 }
 
+unsafe impl Send for SpriteRenderer {}
+
 impl DynComponent for SpriteRenderer {
     fn get_parent(&self) -> Option<&Entity> {
         if self.parent.is_null() {

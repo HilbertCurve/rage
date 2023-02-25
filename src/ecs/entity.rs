@@ -1,12 +1,26 @@
 use super::component::{Component, ComponentError, DynComponent};
 
 pub struct Entity {
-    components: Vec<Box<dyn Component>>,
+    components: Vec<Box<dyn Component + 'static>>,
+    pub id: usize,
+}
+
+impl PartialEq for Entity {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+    fn ne(&self, other: &Self) -> bool {
+        self.id != other.id
+    }
 }
 
 impl Entity {
     pub fn new() -> Entity {
-        Entity { components: vec![] }
+        static mut ID: usize = 0;
+        unsafe {
+            ID += 1;
+            Entity { components: vec![], id: ID }
+        }
     }
 
     pub fn add<T: Component>(&mut self, com: T) -> Result<(), ComponentError> {

@@ -28,7 +28,7 @@ impl Display for ComponentError {
     }
 }
 
-pub trait Component: 'static {
+pub trait Component: 'static + Send {
     fn as_any(&self) -> &dyn std::any::Any;
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
     // TODO: flawed: use better type checking

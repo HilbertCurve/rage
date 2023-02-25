@@ -89,5 +89,9 @@ mod tests {
 
         Ok(())
     }
+    #[test]
+    fn mat_math() {
+        let mat_1 = ();
+    }
 }
 

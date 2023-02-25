@@ -11,15 +11,7 @@ use crate::core::{self, prelude::*};
 use std::sync::mpsc::Receiver;
 
 // unused right now
-#[allow(unused)]
-pub struct Window {
-    width: u32,
-    height: u32,
-    title: String,
-}
-
-// ik it's global state: cry about it
-static mut MAIN_WIN: Option<Window> = None;
+// TODO: move title to config
 const TITLE: &str = "Rage Game Engine";
 
 #[warn(unused)]
@@ -48,13 +40,9 @@ fn init() -> Result<GlfwConf, String> {
     inst.default_window_hints();
     inst.set_swap_interval(glfw::SwapInterval::Sync(1));
 
-    unsafe {
-        MAIN_WIN = Some(Window { 
-            width: 300,
-            height: 300,
-            title: String::from(TITLE),
-        });
-    }
+    core::window::set_width_height(conf.window_width, conf.window_height);
+    core::window::set_title(String::from(TITLE));
+    //core::window::set_scene(DEFAULT_SCENE);
 
     // gl
     gl::load_with(|s| window.get_proc_address(s) as * const _);
@@ -74,13 +62,17 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
 
     // game loop, as specified by current scene
     let (mut glfw, mut window, events) = init()?;
-    let sheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
 
-    let mut player: Entity = Entity::new();
-    let r_player = SpriteRenderer::from(Vec4::new(1.0, 1.0, 1.0, 1.0), sheet.get_texture(0));
+    let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 16, 16, 0)?;
 
-    player.add(Transform::from(Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0)))?;
-    player.attach(r_player)?;
+    let r_player: SpriteRenderer = SpriteRenderer::from(
+        vec4(1.0, 1.0, 1.0, 1.0),
+        spritesheet.get_texture(0));
+    let player: Entity = Entity::new();
+
+    player.attach(r_player);
+
+    core::window::get_scene().add(&mut player);
 
     while !window.should_close() {
         glfw.poll_events();
@@ -88,7 +80,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
             handle_window_event(&mut window, event);
         }
 
-        player.update::<SpriteRenderer>()?;
+        core::window::get_scene().update::<SpriteRenderer>();
         renderer::update();
  
         if keyboard::is_pressed(glfw::Key::A) {
@@ -117,6 +109,9 @@ fn handle_window_event(_window: &mut glfw::Window, event: glfw::WindowEvent) {
         }
         glfw::WindowEvent::Scroll(x, y) => {
             core::mouse::mouse_scroll_event(x, y);
+        }
+        glfw::WindowEvent::Size(x, y) => {
+            core::window::set_width_height(x as u32, y as u32);
         }
         _ => {}
     }

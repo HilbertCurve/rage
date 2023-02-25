@@ -94,7 +94,6 @@ pub fn update() {
             gl::UNSIGNED_INT,
             ptr::null()
             );
-        DEFAULT_VB.vb.print::<f32>();
 
         DEFAULT_VB.disable_attribs();
 

@@ -2,9 +2,12 @@ use crate::ecs::component::Component;
 
 use glam::Vec3;
 
+/// A component that reflects three-dimensional qualities of the attached Entity.
 #[derive(Component, Clone, Copy)]
 pub struct Transform {
+    /// Position
     pub pos: Vec3,
+    /// Width, height, and depth
     pub whd: Vec3,
 }
 
