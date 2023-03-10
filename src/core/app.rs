@@ -7,6 +7,7 @@ use glfw::{Action, Context, Key};
 
 use crate::renderer::renderer;
 use crate::core::{self, prelude::*};
+use crate::core::scene::Scene;
 
 use std::sync::mpsc::Receiver;
 
@@ -40,9 +41,11 @@ fn init() -> Result<GlfwConf, String> {
     inst.default_window_hints();
     inst.set_swap_interval(glfw::SwapInterval::Sync(1));
 
-    core::window::set_width_height(conf.window_width, conf.window_height);
-    core::window::set_title(String::from(TITLE));
-    //core::window::set_scene(DEFAULT_SCENE);
+    unsafe {
+        core::window::set_width_height(conf.window_width, conf.window_height);
+        core::window::set_title(String::from(TITLE));
+        core::window::set_scene(Scene::new());
+    }
 
     // gl
     gl::load_with(|s| window.get_proc_address(s) as * const _);
@@ -68,11 +71,20 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     let r_player: SpriteRenderer = SpriteRenderer::from(
         vec4(1.0, 1.0, 1.0, 1.0),
         spritesheet.get_texture(0));
+    let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+    /*
     let player: Entity = Entity::new();
 
     player.attach(r_player);
 
     core::window::get_scene().add(&mut player);
+    */
+
+    let e_ref = unsafe {
+        core::window::get_scene_mut().spawn()
+    };
+    e_ref.attach(r_player)?;
+    e_ref.add(t_player)?;
 
     while !window.should_close() {
         glfw.poll_events();
@@ -80,7 +92,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
             handle_window_event(&mut window, event);
         }
 
-        core::window::get_scene().update::<SpriteRenderer>();
+        unsafe {
+            core::window::get_scene_mut().update::<SpriteRenderer>()?;
+        }
         renderer::update();
  
         if keyboard::is_pressed(glfw::Key::A) {
@@ -111,7 +125,7 @@ fn handle_window_event(_window: &mut glfw::Window, event: glfw::WindowEvent) {
             core::mouse::mouse_scroll_event(x, y);
         }
         glfw::WindowEvent::Size(x, y) => {
-            core::window::set_width_height(x as u32, y as u32);
+            core::window::width_height_event(x as u32, y as u32);
         }
         _ => {}
     }

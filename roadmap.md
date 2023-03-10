@@ -63,6 +63,12 @@ Audio:
 - [ ] AudioListener
 - [ ] AudioSource
 
+Physics:
+- [ ] Framework - set up the physics factory
+- [ ] Collision detection
+- [ ] Collision resolution using conservation of momentum and energy
+- [ ] Rotational collision resolution - how does friction play into this?
+
 State Machines:
 - [ ] Plan
 

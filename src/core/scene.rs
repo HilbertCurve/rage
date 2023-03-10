@@ -36,6 +36,9 @@ impl Scene {
             Scene { e_vec: vec![], id: ID }
         }
     }
+    pub const fn empty() -> Scene {
+        Scene { e_vec: vec![], id: 0 }
+    }
     /*
     pub fn add(&mut self, entity: &'static mut Entity) -> Result<(), SceneError> {
         // ensure entity not added
@@ -63,7 +66,19 @@ impl Scene {
     */
     pub fn spawn(&mut self) -> &mut Entity {
         self.e_vec.push(Entity::new());
-        &mut self.e_vec.last().expect("")
+        self.e_vec.last_mut().expect("entity creation failed")
+    }
+    pub fn despawn(&mut self, entity: &mut Entity) -> Result<(), SceneError> {
+        // search and remove
+        for i in 0..self.e_vec.len() {
+            if &self.e_vec[i] == entity {
+                self.e_vec.remove(i);
+                return Ok(());
+            }
+        }
+        Err(SceneError::new(
+                &format!("Entity of id: {} not found in Scene of id: {}",
+                         entity.id, self.id)))
     }
     pub fn update<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
         for i in 0..self.e_vec.len() {
