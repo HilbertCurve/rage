@@ -14,16 +14,33 @@ extern crate glam;
 #[cfg(test)]
 mod tests {
     use super::core::prelude::*;
+    use super::core;
     use super::utils::block::{Block, BlockError};
     use super::renderer::texture::Spritesheet;
+    use super::ecs::prelude::*;
+    use glam::*;
 
     #[test]
-    fn it_works() {
+    fn it_works() -> Result<(), Box<dyn std::error::Error>> {
         let mut config: Config = Config::default();
         config.window_height = 600;
 
+        app::run(config, || {
+            let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 16, 16, 0)?;
 
-        app::run(config).expect("rage-quit");
+            let r_player: SpriteRenderer = SpriteRenderer::from(
+                vec4(1.0, 1.0, 1.0, 1.0),
+                spritesheet.get_texture(0));
+            let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+
+            let e_ref = unsafe {
+                core::window::get_scene_mut().spawn()
+            };
+            e_ref.attach(r_player)?;
+            e_ref.add(t_player)?;
+
+            Ok(())
+        })
     }
 
     #[test]
@@ -47,7 +64,7 @@ mod tests {
             (
                 block.pop::<f32>()?,
                 block.pop::<u32>()?,
-            )
+                )
         };
 
         assert_eq!(fval, 1.0, "Popped signed value not expected value: expected 4, got {}", fval);
@@ -88,10 +105,6 @@ mod tests {
         }
 
         Ok(())
-    }
-    #[test]
-    fn mat_math() {
-        let mat_1 = ();
     }
 }
 

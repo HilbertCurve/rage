@@ -11,11 +11,11 @@ use crate::core::scene::Scene;
 
 use std::sync::mpsc::Receiver;
 
-// unused right now
+pub type RageResult = Result<(), Box<dyn std::error::Error>>;
+
 // TODO: move title to config
 const TITLE: &str = "Rage Game Engine";
 
-#[warn(unused)]
 type GlfwConf = (glfw::Glfw, glfw::Window, Receiver<(f64, glfw::WindowEvent)>);
 
 fn init() -> Result<GlfwConf, String> {
@@ -50,41 +50,27 @@ fn init() -> Result<GlfwConf, String> {
     // gl
     gl::load_with(|s| window.get_proc_address(s) as * const _);
 
+    // start engines
     renderer::start();
 
     Ok((inst, window, events))
 }
 
 use glam::*;
-use crate::renderer::texture::Spritesheet;
 use crate::ecs::prelude::*;
+
 /// Initializes and runs program, consuming inputted configuration object.
-pub fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
+pub fn run<F>(config: Config, setup: F) -> RageResult
+where
+    F: FnOnce() -> RageResult
+{
     // set config
     Config::set(config)?;
 
     // game loop, as specified by current scene
     let (mut glfw, mut window, events) = init()?;
 
-    let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 16, 16, 0)?;
-
-    let r_player: SpriteRenderer = SpriteRenderer::from(
-        vec4(1.0, 1.0, 1.0, 1.0),
-        spritesheet.get_texture(0));
-    let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
-    /*
-    let player: Entity = Entity::new();
-
-    player.attach(r_player);
-
-    core::window::get_scene().add(&mut player);
-    */
-
-    let e_ref = unsafe {
-        core::window::get_scene_mut().spawn()
-    };
-    e_ref.attach(r_player)?;
-    e_ref.add(t_player)?;
+    setup()?;
 
     while !window.should_close() {
         glfw.poll_events();

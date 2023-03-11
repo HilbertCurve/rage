@@ -12,6 +12,7 @@ Renderer:
 - [x] Textures
 - [ ] Fonts and text
 - [ ] 3D Rendering
+- [ ] Debugging
 
 3D Rendering:
 - [ ] glTF Parser
@@ -24,7 +25,7 @@ Core:
 - [x] Window config
 - [ ] Renderer config - WIP
 - [x] Misc. config through config.rs
-- [ ] Scenes - this should wait until ecs is working
+- [x] Scenes - this should wait until ecs is working
 - [x] Blocks - data chunks, primarily for renderer
 
 Example Scene (goal):
@@ -32,17 +33,14 @@ Example Scene (goal):
 pub fn start(scene: &mut Scene) -> Result<(), SceneError> {
     scene.spawn(...);
 }
-pub fn update() ...
-pub fn stop() ...
-static s_main: Scene = Scene::build(&start, &update, &stop);
 
 pub fn main() {
     // config stuff
     ...
 
     // App setup
-    App::set_scene(s_main);
-    App::run();
+    app::set_scene(s_main);
+    app::run();
 }
 ```
 
@@ -53,7 +51,7 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Component derive
 - [x] Basic components - transform, etc
 - [x] Dynamic components
-- [ ] Scenes - collection of entities that can be updated en masse
+- [x] Scenes - collection of entities that can be updated en masse
 - [x] Basic sprite renderer
 - [ ] Tests
 
