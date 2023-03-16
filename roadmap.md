@@ -53,6 +53,7 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Dynamic components
 - [x] Scenes - collection of entities that can be updated en masse
 - [x] Basic sprite renderer
+- [ ] Scene function pointer integration
 - [ ] Tests
 
 Audio:
@@ -61,7 +62,7 @@ Audio:
 - [ ] AudioListener
 - [ ] AudioSource
 
-Physics:
+Physics: Main controller -> RigidBody factory. Collider is the component form of a RigidBody, and there's a 1-to-1 correspondence between created components and RigidBody's (to be managed by a custom drop() function).
 - [ ] Framework - set up the physics factory
 - [ ] Collision detection
 - [ ] Collision resolution using conservation of momentum and energy

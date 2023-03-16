@@ -15,32 +15,59 @@ extern crate glam;
 mod tests {
     use super::core::prelude::*;
     use super::core;
+    use super::core::app::{World, RageResult};
     use super::utils::block::{Block, BlockError};
     use super::renderer::texture::Spritesheet;
     use super::ecs::prelude::*;
+    use super::core::scene::Scene;
     use glam::*;
 
+    fn s_init(scene: &mut Scene) -> RageResult {
+        let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 16, 16, 0)?;
+
+        let r_player: SpriteRenderer = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture(0));
+        let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+
+        let e_ref = unsafe {
+            scene.spawn()
+        };
+        e_ref.attach(r_player)?;
+        e_ref.add(t_player)?;
+
+        Ok(())
+    }
+
     #[test]
+    pub fn pog() -> RageResult {
+        // Setup
+        let mut config: Config = Config::default();
+
+        World::new()
+            .on_start(s_init)
+            .on_update(s_update)
+            .set_config(config)
+            .run()
+    }
+
+
+
+
+
+
+    //#[test]
     fn it_works() -> Result<(), Box<dyn std::error::Error>> {
+        let mut app: World = World::new();
+
+        let mut s_main: Scene = Scene::new();
+        s_main.set_start(s_init);
+
         let mut config: Config = Config::default();
         config.window_height = 600;
 
-        app::run(config, || {
-            let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 16, 16, 0)?;
-
-            let r_player: SpriteRenderer = SpriteRenderer::from(
-                vec4(1.0, 1.0, 1.0, 1.0),
-                spritesheet.get_texture(0));
-            let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
-
-            let e_ref = unsafe {
-                core::window::get_scene_mut().spawn()
-            };
-            e_ref.attach(r_player)?;
-            e_ref.add(t_player)?;
-
-            Ok(())
-        })
+        //app.add_scene(s_main);
+        app.run(config)
     }
 
     #[test]

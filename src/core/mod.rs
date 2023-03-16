@@ -7,7 +7,7 @@ pub mod window;
 
 pub mod prelude {
     pub mod app {
-        pub use crate::core::app::run;
+        pub use crate::core::app::World;
     }
     pub use super::config::Config;
     pub mod mouse {
@@ -31,8 +31,6 @@ pub mod prelude {
             set_width_height,
             get_title,
             set_title,
-            get_scene,
-            set_scene,
         };
     }
 }

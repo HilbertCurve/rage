@@ -7,7 +7,6 @@ use std::fmt::{Debug, Display};
 pub struct Scene {
     pub e_vec: Vec<Entity>,
     pub id: usize,
-    // TODO: start, update, and stop function ptrs
 }
 
 #[derive(Debug)]
@@ -28,17 +27,26 @@ impl Display for SceneError {
     }
 }
 
+static mut SCENE_ID_ACC: usize = 0;
 impl Scene {
     pub fn new() -> Scene {
-        static mut ID: usize = 0;
         unsafe {
-            ID += 1;
-            Scene { e_vec: vec![], id: ID }
+            SCENE_ID_ACC += 1;
+            Scene {
+                e_vec: vec![],
+                id: SCENE_ID_ACC,
+            }
         }
     }
+
     pub const fn empty() -> Scene {
-        Scene { e_vec: vec![], id: 0 }
+        //TODO: make default scene
+        Scene {
+            e_vec: vec![],
+            id: 0,
+        }
     }
+
     /*
     pub fn add(&mut self, entity: &'static mut Entity) -> Result<(), SceneError> {
         // ensure entity not added
