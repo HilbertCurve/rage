@@ -22,7 +22,7 @@ mod tests {
     use super::core::scene::Scene;
     use glam::*;
 
-    fn s_init(scene: &mut Scene) -> RageResult {
+    fn s_init(world: &mut World) -> RageResult {
         let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 16, 16, 0)?;
 
         let r_player: SpriteRenderer = SpriteRenderer::from(
@@ -30,12 +30,19 @@ mod tests {
             spritesheet.get_texture(0));
         let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
 
+        let mut scene_id = world.new_scene();
+        world.set_scene(scene_id)?;
+        let mut scene = world.get_scene(scene_id)?;
+
         let e_ref = unsafe {
             scene.spawn()
         };
         e_ref.attach(r_player)?;
         e_ref.add(t_player)?;
 
+        Ok(())
+    }
+    fn s_update(world: &mut World, dt: f64) -> RageResult {
         Ok(())
     }
 
@@ -58,6 +65,7 @@ mod tests {
 
     //#[test]
     fn it_works() -> Result<(), Box<dyn std::error::Error>> {
+        /*
         let mut app: World = World::new();
 
         let mut s_main: Scene = Scene::new();
@@ -68,6 +76,8 @@ mod tests {
 
         //app.add_scene(s_main);
         app.run(config)
+        */
+        Ok(())
     }
 
     #[test]

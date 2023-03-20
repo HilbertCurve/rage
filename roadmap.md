@@ -27,21 +27,10 @@ Core:
 - [x] Misc. config through config.rs
 - [x] Scenes - this should wait until ecs is working
 - [x] Blocks - data chunks, primarily for renderer
+- [ ] World - delta time, configuration, WorldBuilder
 
 Example Scene (goal):
 ```rust 
-pub fn start(scene: &mut Scene) -> Result<(), SceneError> {
-    scene.spawn(...);
-}
-
-pub fn main() {
-    // config stuff
-    ...
-
-    // App setup
-    app::set_scene(s_main);
-    app::run();
-}
 ```
 
 ECS: Entity Component System
@@ -53,7 +42,7 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Dynamic components
 - [x] Scenes - collection of entities that can be updated en masse
 - [x] Basic sprite renderer
-- [ ] Scene function pointer integration
+- [-] Scene function pointer integration - moved to World
 - [ ] Tests
 
 Audio:

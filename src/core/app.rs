@@ -21,12 +21,16 @@ const TITLE: &str = "Rage Game Engine";
 
 pub struct WorldBuilder {
     start_fn: fn(&mut World) -> RageResult,
+    update_fn: fn(&mut World, f64) -> RageResult,
+    config: Config,
 }
 
 impl Default for WorldBuilder {
     fn default() -> WorldBuilder {
         WorldBuilder {
-            start_fn: |_| { Ok(()) }
+            start_fn: |_| Ok(()),
+            update_fn: |_, _| Ok(()),
+            config: Config::default(),
         }
     }
 }
@@ -36,14 +40,35 @@ impl WorldBuilder {
         self.start_fn = start;
         self
     }
+    pub fn on_update(mut self, update: fn(&mut World, f64) -> RageResult) -> WorldBuilder {
+        self.update_fn = update;
+        self
+    }
+    pub fn set_config(mut self, config: Config) -> WorldBuilder {
+        self.config = config;
+        self
+    }
+    pub fn run(self) -> RageResult {
+        let built_world: World = World {
+            scenes: vec![],
+            uptime: 0.0,
+            current_fps: 0.0,
+            current_scene_id: 0,
+            start: self.start_fn,
+            update: self.update_fn,
+        };
+        built_world.run(self.config)
+    }
 }
 
 pub struct World {
     // SceneManager?
     scenes: Vec<Scene>,
-    uptime: usize,
+    uptime: f64,
     current_fps: f64,
     current_scene_id: usize,
+    start: fn(&mut World) -> RageResult,
+    update: fn(&mut World, f64) -> RageResult,
     //...
 }
 
@@ -52,7 +77,7 @@ impl World {
         WorldBuilder::default()
     }
 
-    pub fn new_scene(&'static mut self) -> usize {
+    pub fn new_scene(&mut self) -> usize {
         let scene = Scene::new();
         let scene_id = scene.id;
 
@@ -83,14 +108,14 @@ impl World {
     }
 
     /// Initializes and runs program, consuming inputted configuration object.
-    pub fn run(self, config: Config) -> RageResult {
+    pub fn run(mut self, config: Config) -> RageResult {
         // set config
         Config::set(config)?;
 
         // game loop, as specified by current scene
         // TODO: move to window.rs
         let (mut glfw, mut window, events) = World::window_init()?;
-
+        (self.start)(&mut self)?;
 
         while !window.should_close() {
             glfw.poll_events();
@@ -99,10 +124,10 @@ impl World {
             }
 
             //TODO: toggle which ones update in Config?
-            unsafe {
-                self.get_scene(self.current_scene_id)?.update::<SpriteRenderer>()?;
-                //self.get_scene(self.current_scene_id)?.update::<Collider>()?;
-            }
+            //TODO (critical): delta time!!!
+            (self.update)(&mut self, 0.0)?;
+            self.get_scene(self.current_scene_id)?.update::<SpriteRenderer>()?;
+            //self.get_scene(self.current_scene_id)?.update::<Collider>()?;
             renderer::update();
 
             if keyboard::is_pressed(glfw::Key::A) {
@@ -113,6 +138,10 @@ impl World {
             }
 
             window.swap_buffers();
+            // self.uptime += dt;
+            // self.current_fps = 1.0 / dt;
+            self.uptime += 0.0;
+            self.current_fps = 0.0;
         }
 
         Ok(())
