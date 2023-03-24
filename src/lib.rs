@@ -30,9 +30,9 @@ mod tests {
             spritesheet.get_texture(0));
         let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
 
-        let mut scene_id = world.new_scene();
+        let scene_id = world.new_scene();
         world.set_scene(scene_id)?;
-        let mut scene = world.get_scene(scene_id)?;
+        let scene = world.get_scene(scene_id)?;
 
         let e_ref = unsafe {
             scene.spawn()

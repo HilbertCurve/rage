@@ -81,7 +81,7 @@ impl World {
         let scene = Scene::new();
         let scene_id = scene.id;
 
-        self.scenes.push(Scene::new());
+        self.scenes.push(scene);
 
         scene_id
     }
