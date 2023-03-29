@@ -7,6 +7,7 @@ use std::fmt::{Debug, Display};
 pub struct Scene {
     pub e_vec: Vec<Entity>,
     pub id: usize,
+    name: String,
 }
 
 #[derive(Debug)]
@@ -29,12 +30,13 @@ impl Display for SceneError {
 
 static mut SCENE_ID_ACC: usize = 0;
 impl Scene {
-    pub fn new() -> Scene {
+    pub fn new(name: String) -> Scene {
         unsafe {
             SCENE_ID_ACC += 1;
             Scene {
                 e_vec: vec![],
                 id: SCENE_ID_ACC,
+                name,
             }
         }
     }
@@ -44,6 +46,7 @@ impl Scene {
         Scene {
             e_vec: vec![],
             id: 0,
+            name: String::new(),
         }
     }
 
@@ -72,9 +75,17 @@ impl Scene {
                          entity.id, self.id)))
     }
     */
-    pub fn spawn(&mut self) -> &mut Entity {
-        self.e_vec.push(Entity::new());
-        self.e_vec.last_mut().expect("entity creation failed")
+    pub fn spawn(&mut self, name: &str) -> Result<&mut Entity, SceneError> {
+        for i in 0..self.e_vec.len() {
+            if &self.e_vec[i].name() == name {
+                return Err(SceneError::new(
+                        &format!("Entity of name: {}, id: {} already in Scene of name: {}, id: {}",
+                                 &self.e_vec[i].name(), &self.e_vec[i].id(),
+                                 self.name, self.id)));
+            }
+        }
+        self.e_vec.push(Entity::new(name.to_owned()));
+        Ok(self.e_vec.last_mut().expect("entity creation failed"))
     }
     pub fn despawn(&mut self, entity: &mut Entity) -> Result<(), SceneError> {
         // search and remove
@@ -85,14 +96,18 @@ impl Scene {
             }
         }
         Err(SceneError::new(
-                &format!("Entity of id: {} not found in Scene of id: {}",
-                         entity.id, self.id)))
+                &format!("Entity of name: {}, id: {} not found in Scene of name: {} id: {}",
+                         entity.name(), entity.id(),
+                         self.name, self.id)))
     }
     pub fn update<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
         for i in 0..self.e_vec.len() {
             self.e_vec[i].update::<T>()?;
         }
         Ok(())
+    }
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }
 

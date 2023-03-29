@@ -18,7 +18,6 @@ type GlfwConf = (glfw::Glfw, glfw::Window, Receiver<(f64, glfw::WindowEvent)>);
 
 // TODO: move title to config
 const TITLE: &str = "Rage Game Engine";
-
 pub struct WorldBuilder {
     start_fn: fn(&mut World) -> RageResult,
     update_fn: fn(&mut World, f64) -> RageResult,
@@ -53,7 +52,7 @@ impl WorldBuilder {
             scenes: vec![],
             uptime: 0.0,
             current_fps: 0.0,
-            current_scene_id: 0,
+            current_scene: String::new(),
             start: self.start_fn,
             update: self.update_fn,
         };
@@ -66,7 +65,7 @@ pub struct World {
     scenes: Vec<Scene>,
     uptime: f64,
     current_fps: f64,
-    current_scene_id: usize,
+    current_scene: String,
     start: fn(&mut World) -> RageResult,
     update: fn(&mut World, f64) -> RageResult,
     //...
@@ -77,34 +76,42 @@ impl World {
         WorldBuilder::default()
     }
 
-    pub fn new_scene(&mut self) -> usize {
-        let scene = Scene::new();
-        let scene_id = scene.id;
+    pub fn new_scene(&mut self, name: &str) -> Result<&mut Scene, SceneError> {
+        for i in 0..self.scenes.len() {
+            if self.scenes[i].name() == name {
+                return Err(SceneError::new(
+                        &format!("Scene of name: {} already in World.", name)));
+            }
+        }
+        let scene = Scene::new(name.to_owned());
 
         self.scenes.push(scene);
-
-        scene_id
+        Ok(self.scenes.last_mut().expect("stinki2"))
     }
 
-    pub fn get_scene(&mut self, id: usize) -> Result<&mut Scene, SceneError> {
+    pub fn get_scene(&mut self, name: &str) -> Result<&mut Scene, SceneError> {
         for i in 0..self.scenes.len() {
-            if self.scenes[i].id == id {
+            if self.scenes[i].name() == name {
                 return Ok(&mut self.scenes[i]);
             }
         }
-        Err(SceneError::new(&format!("Scene of id: {} not found in World.", id)))
+        Err(SceneError::new(&format!("Scene of name: {} not found in World.", name)))
     }
-    pub fn set_scene(&mut self, id: usize) -> Result<(), SceneError> {
+    pub fn set_scene(&mut self, name: &str) -> Result<(), SceneError> {
         for i in 0..self.scenes.len() {
-            if self.scenes[i].id == id {
-                self.current_scene_id = id;
+            if self.scenes[i].name() == name {
+                self.current_scene = name.to_owned();
                 return Ok(());
             }
         }
-        Err(SceneError::new(&format!("Scene of id: {} not found in World.", id)))
+        Err(SceneError::new(&format!("Scene of name: {} not found in World.", name)))
     }
-    pub fn current_scene(&mut self) -> &mut Scene {
-        self.get_scene(self.current_scene_id).expect("stinki!")
+    pub fn current_scene(&mut self) -> Result<&mut Scene, SceneError> {
+        if self.current_scene == "" {
+            Err(SceneError::new("No default scene set!"))
+        } else {
+            Ok(self.get_scene(&self.current_scene.clone()).expect("stinki!"))
+        }
     }
 
     /// Initializes and runs program, consuming inputted configuration object.
@@ -126,7 +133,7 @@ impl World {
             //TODO: toggle which ones update in Config?
             //TODO (critical): delta time!!!
             (self.update)(&mut self, 0.0)?;
-            self.get_scene(self.current_scene_id)?.update::<SpriteRenderer>()?;
+            self.current_scene()?.update::<SpriteRenderer>()?;
             //self.get_scene(self.current_scene_id)?.update::<Collider>()?;
             renderer::update();
 

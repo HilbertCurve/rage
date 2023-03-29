@@ -43,7 +43,9 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Scenes - collection of entities that can be updated en masse
 - [x] Basic sprite renderer
 - [-] Scene function pointer integration - moved to World
-- [ ] Tests
+- [+] Scene change test
+- [+] Scene names
+- [+] Entity names
 
 Audio:
 - [ ] Audio setup (find OpenAL bindings)

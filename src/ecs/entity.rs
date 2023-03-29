@@ -2,7 +2,8 @@ use super::component::{Component, ComponentError, DynComponent};
 
 pub struct Entity {
     components: Vec<Box<dyn Component + 'static>>,
-    pub id: usize,
+    id: usize,
+    name: String,
 }
 
 impl PartialEq for Entity {
@@ -15,11 +16,11 @@ impl PartialEq for Entity {
 }
 
 impl Entity {
-    pub fn new() -> Entity {
+    pub fn new(name: String) -> Entity {
         static mut ID: usize = 0;
         unsafe {
             ID += 1;
-            Entity { components: vec![], id: ID }
+            Entity { components: vec![], id: ID, name }
         }
     }
 
@@ -100,6 +101,14 @@ impl Entity {
 
     pub fn update<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
         self.get_mut::<T>()?.update()
+    }
+
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn id(&self) -> usize {
+        self.id
     }
 }
 

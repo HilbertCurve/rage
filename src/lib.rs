@@ -22,27 +22,52 @@ mod tests {
     use super::core::scene::Scene;
     use glam::*;
 
-    fn s_init(world: &mut World) -> RageResult {
-        let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 16, 16, 0)?;
+    pub fn s_init(world: &mut World) -> RageResult {
+        let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
 
-        let r_player: SpriteRenderer = SpriteRenderer::from(
+        ////////////////////////////
+        // Scene 0                //
+        ////////////////////////////
+        let r_player_0: SpriteRenderer = SpriteRenderer::from(
             vec4(1.0, 1.0, 1.0, 1.0),
             spritesheet.get_texture(0));
-        let t_player: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+        let t_player_0: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+        let r_side_0: SpriteRenderer = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture(0));
+        let t_side_0: Transform = Transform::from(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
 
-        let scene_id = world.new_scene();
-        world.set_scene(scene_id)?;
-        let scene = world.get_scene(scene_id)?;
+        let scene = world.new_scene("main")?;
 
-        let e_ref = unsafe {
-            scene.spawn()
-        };
-        e_ref.attach(r_player)?;
-        e_ref.add(t_player)?;
+        let e_ref_0 = scene.spawn("center")?;
+        e_ref_0.attach(r_player_0)?;
+        e_ref_0.add(t_player_0)?;
+        let e_side_0 = scene.spawn("right")?;
+        e_side_0.attach(r_side_0)?;
+        e_side_0.add(t_side_0)?;
+
+        ////////////////////////////
+        // Scene 1                //
+        ////////////////////////////
+        let r_player_1: SpriteRenderer = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture(2));
+        let t_player_1: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+
+        let scene = world.new_scene("next")?;
+
+        let e_ref_1 = scene.spawn("center")?;
+        e_ref_1.attach(r_player_1)?;
+        e_ref_1.add(t_player_1)?;
 
         Ok(())
     }
     fn s_update(world: &mut World, dt: f64) -> RageResult {
+        world.set_scene("main")?;
+        println!("asdfasdf");
+        if keyboard::is_pressed(glfw::Key::Space) {
+            world.set_scene("next")?;
+        }
         Ok(())
     }
 
