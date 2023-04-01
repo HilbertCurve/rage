@@ -173,7 +173,7 @@ impl VertexBuffer {
                 );
             gl::BufferData(
                 gl::ELEMENT_ARRAY_BUFFER,
-                (self.ib.len() * mem::size_of::<u32>()) as isize,
+                (self.ib.len()) as isize,
                 self.ib.as_ptr().cast(),
                 gl::DYNAMIC_DRAW
                 );

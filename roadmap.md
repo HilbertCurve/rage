@@ -29,10 +29,6 @@ Core:
 - [x] Blocks - data chunks, primarily for renderer
 - [ ] World - delta time, configuration, WorldBuilder
 
-Example Scene (goal):
-```rust 
-```
-
 ECS: Entity Component System
 What if we had scenes create objects that are manipulated on the fly? Kinda like the factory pattern?
 - [x] Entities
@@ -43,7 +39,6 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Scenes - collection of entities that can be updated en masse
 - [x] Basic sprite renderer
 - [-] Scene function pointer integration - moved to World
-- [+] Scene change test
 - [+] Scene names
 - [+] Entity names
 
@@ -64,6 +59,7 @@ State Machines:
 
 Tests:
 - [ ] More block tests; edge cases
+- [+] Scene change test
 
 Misc:
 - [ ] Make README
@@ -72,5 +68,5 @@ Misc:
 - [-] ChainError - wouldn't have much use, as many functions fail at library level, and most errors can be debugged without too much trouble
 
 Known bugs:
-- [ ] Fix gl::Viewport; currently items clip off of the screen easily
+- [+] Fix gl::Viewport; currently items clip off of the screen easily
 

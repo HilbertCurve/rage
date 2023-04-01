@@ -128,7 +128,7 @@ impl Renderable for SpriteRenderer {
             acc += 2;
         }
 
-        buf.size += 2;
+        buf.size += 1;
 
         Ok(())
     }

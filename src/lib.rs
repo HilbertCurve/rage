@@ -14,12 +14,10 @@ extern crate glam;
 #[cfg(test)]
 mod tests {
     use super::core::prelude::*;
-    use super::core;
     use super::core::app::{World, RageResult};
     use super::utils::block::{Block, BlockError};
     use super::renderer::texture::Spritesheet;
     use super::ecs::prelude::*;
-    use super::core::scene::Scene;
     use glam::*;
 
     pub fn s_init(world: &mut World) -> RageResult {
@@ -31,11 +29,11 @@ mod tests {
         let r_player_0: SpriteRenderer = SpriteRenderer::from(
             vec4(1.0, 1.0, 1.0, 1.0),
             spritesheet.get_texture(0));
-        let t_player_0: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+        let t_player_0: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0));
         let r_side_0: SpriteRenderer = SpriteRenderer::from(
             vec4(1.0, 1.0, 1.0, 1.0),
             spritesheet.get_texture(0));
-        let t_side_0: Transform = Transform::from(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+        let t_side_0: Transform = Transform::from(vec3(100.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0));
 
         let scene = world.new_scene("main")?;
 
@@ -52,7 +50,7 @@ mod tests {
         let r_player_1: SpriteRenderer = SpriteRenderer::from(
             vec4(1.0, 1.0, 1.0, 1.0),
             spritesheet.get_texture(2));
-        let t_player_1: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
+        let t_player_1: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0));
 
         let scene = world.new_scene("next")?;
 
@@ -62,9 +60,8 @@ mod tests {
 
         Ok(())
     }
-    fn s_update(world: &mut World, dt: f64) -> RageResult {
+    fn s_update(world: &mut World, _dt: f64) -> RageResult {
         world.set_scene("main")?;
-        println!("asdfasdf");
         if keyboard::is_pressed(glfw::Key::Space) {
             world.set_scene("next")?;
         }
@@ -74,7 +71,7 @@ mod tests {
     #[test]
     pub fn pog() -> RageResult {
         // Setup
-        let mut config: Config = Config::default();
+        let config: Config = Config::default();
 
         World::new()
             .on_start(s_init)
@@ -89,8 +86,8 @@ mod tests {
 
 
     //#[test]
+    /*
     fn it_works() -> Result<(), Box<dyn std::error::Error>> {
-        /*
         let mut app: World = World::new();
 
         let mut s_main: Scene = Scene::new();
@@ -100,10 +97,11 @@ mod tests {
         config.window_height = 600;
 
         //app.add_scene(s_main);
-        app.run(config)
-        */
+        app.run(config);
+
         Ok(())
     }
+    */
 
     #[test]
     fn block_test_push_pop() -> Result<(), BlockError> {

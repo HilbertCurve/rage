@@ -1,6 +1,7 @@
 extern crate glam;
 
 use crate::core::config::Config;
+use crate::core::window;
 
 use glam::{Vec3, Quat, Mat4};
 use std::sync::Once;
@@ -18,7 +19,6 @@ pub struct Camera {
     pos: Vec3,
     orient: Quat,
     fov: f32,
-    aspect: f32,
     zoom: f32,
     mode: CameraMode,
 }
@@ -30,7 +30,6 @@ impl Camera {
             orient: Quat::from_xyzw(0.0, 0.0, 0.0, 1.0),
             // TODO: specify these in config.rs
             fov: PI / 3.0,
-            aspect: 4.0 / 3.0,
             zoom: 1.0,
             mode: Config::get().proj_mode,
         }
@@ -51,16 +50,18 @@ impl Camera {
     }
 
     pub fn projection_mat(&self) -> Mat4 {
+        let (win_w, win_h) = window::get_width_height();
+        let (win_w, win_h) = (win_w as f32, win_h as f32);
         match &self.mode {
             CameraMode::Orthographic => {
                 // TODO: idk if zoom is necessary ??
                 Mat4::orthographic_rh_gl(
-                    -self.aspect * self.zoom, self.aspect * self.zoom,
-                    -self.zoom, self.zoom,
+                    -win_w * self.zoom, win_w * self.zoom,
+                    -win_h * self.zoom, win_h * self.zoom,
                     0.01, 100.0)
             }
             CameraMode::Perspective => {
-                Mat4::perspective_rh_gl(self.fov, self.aspect, 0.01, 100.0)
+                Mat4::perspective_rh_gl(self.fov, win_w / win_h, 0.01, 100.0)
             }
         }
     }

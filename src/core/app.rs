@@ -1,9 +1,7 @@
 extern crate gl;
 extern crate glfw;
 
-#[allow(unused)]
-use glfw::{Action, Context, Key};
-#[deny(unused)]
+use glfw::Context;
 
 use crate::ecs::prelude::*;
 use crate::core::{self, prelude::*};
@@ -172,6 +170,7 @@ impl World {
         window.set_mouse_button_polling(true);
         window.set_cursor_pos_polling(true);
         window.set_scroll_polling(true);
+        window.set_size_polling(true);
         window.make_current();
 
         inst.default_window_hints();
@@ -207,6 +206,10 @@ impl World {
             }
             glfw::WindowEvent::Size(x, y) => {
                 core::window::width_height_event(x as u32, y as u32);
+                println!("({},{})", x, y);
+                unsafe {
+                    gl::Viewport(0, 0, x, y);
+                }
             }
             _ => {}
         }
