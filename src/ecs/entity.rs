@@ -37,14 +37,13 @@ impl Entity {
         Ok(())
     }
 
-    pub fn attach<T: DynComponent>(&mut self, mut com: T) -> Result<(), ComponentError> {
+    pub fn attach<T: DynComponent>(&mut self, com: T) -> Result<(), ComponentError> {
         for g_com in &mut self.components {
             if let Some(_) = g_com.as_any_mut().downcast_mut::<T>() {
                 return Err(ComponentError::AlreadyPresent(T::type_str().to_owned()));
             }
         }
 
-        com.set_parent(self);
         self.components.push(Box::new(com));
 
         Ok(())
@@ -67,8 +66,7 @@ impl Entity {
     pub fn detach<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
         let mut acc: usize = 0;
         for g_com in &mut self.components {
-            if let Some(com) = g_com.as_any_mut().downcast_mut::<T>() {
-                com.detach();
+            if let Some(_) = g_com.as_any_mut().downcast_mut::<T>() {
                 self.components.remove(acc);
                 return Ok(());
             } else {
@@ -100,7 +98,10 @@ impl Entity {
     }
 
     pub fn update<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
-        self.get_mut::<T>()?.update()
+        let c = self as *mut Entity;
+        unsafe {
+            self.get_mut::<T>()?.update(c)
+        }
     }
 
     pub fn name(&self) -> String {

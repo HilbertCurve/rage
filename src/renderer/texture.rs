@@ -72,10 +72,10 @@ impl Spritesheet {
 
     pub fn get_texture(&self, index: usize) -> Texture {
         // get offset from top
-        let from_top = ((index as f32 * self.s_width as f32 / self.width as f32)
-                        * (self.s_height as f32 + self.padding as f32)).floor() as u32;
+        let from_top = ((index as f32 * self.s_width as f32 / self.width as f32).floor()
+                        * (self.s_height as f32 + self.padding as f32)) as u32;
         // get offset from left
-        let from_left = (index as u32 * self.s_width + self.padding) % self.width;
+        let from_left = (index as u32 * (self.s_width + self.padding)) % self.width;
 
         let mut pos1 = (from_left as f32, from_top as f32);
         let mut pos2 = ((from_left + self.s_width) as f32, (from_top + self.s_height) as f32);

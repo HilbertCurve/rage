@@ -15,7 +15,7 @@ use crate::renderer::{
 pub struct SpriteRenderer {
     pub color: Vec4,
     pub texture: Texture,
-    parent: *const Entity,
+    trans_cache: Transform,
 }
 
 impl SpriteRenderer {
@@ -23,7 +23,7 @@ impl SpriteRenderer {
         SpriteRenderer {
             color,
             texture,
-            parent: std::ptr::null(),
+            trans_cache: Transform::zero(),
         }
     }
 }
@@ -31,21 +31,9 @@ impl SpriteRenderer {
 unsafe impl Send for SpriteRenderer {}
 
 impl DynComponent for SpriteRenderer {
-    fn get_parent(&self) -> Option<&Entity> {
-        if self.parent.is_null() {
-            None
-        } else {
-            unsafe { Some(&*self.parent) }
-        }
-    }
-    fn set_parent(&mut self, parent: &Entity) {
-        self.parent = parent as *const Entity;
-    }
-    fn detach(&mut self) {
-        self.parent = std::ptr::null();
-    }
-    fn update(&mut self) -> Result<(), ComponentError> {
-        if let Err(err) = unsafe { self.to_buffer(&mut DEFAULT_VB) } {
+    unsafe fn update(&mut self, parent: *mut Entity) -> Result<(), ComponentError> {
+        self.trans_cache = (*parent).get::<Transform>()?.clone();
+        if let Err(err) = self.to_buffer(&mut DEFAULT_VB) {
             Err(ComponentError::BadUpdate(format!("Buffering failed: {}", err)))
         } else {
             Ok(())
@@ -56,10 +44,7 @@ impl DynComponent for SpriteRenderer {
 impl Renderable for SpriteRenderer {
     fn to_buffer(&self, buf: &mut VertexBuffer) -> Result<(), RenderError> {
         // get transform
-        let trans = *self
-            .get_parent().expect("how was this updated if it had no parent?")
-            .get::<Transform>()
-            .or(Err(RenderError::from("No transform")))?;
+        let trans = self.trans_cache;
 
         let mut offset = buf.vb.len();
 

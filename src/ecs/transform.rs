@@ -15,5 +15,8 @@ impl Transform {
     pub fn from(pos: Vec3, whd: Vec3) -> Transform {
         Transform { pos, whd }
     }
+    pub fn zero() -> Transform {
+        Transform { pos: Vec3::ZERO, whd: Vec3::ZERO }
+    }
 }
 

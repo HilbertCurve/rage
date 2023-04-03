@@ -20,7 +20,98 @@ mod tests {
     use super::ecs::prelude::*;
     use glam::*;
 
-    pub fn s_init(world: &mut World) -> RageResult {
+    fn many_entity_init(world: &mut World) -> RageResult {
+        let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
+
+        let scene = world.new_scene("main")?;
+        for i in 0..10 {
+            for j in 0..10 {
+                let r_entity = SpriteRenderer::from(
+                    vec4(1.0, 1.0, 1.0, 1.0),
+                    spritesheet.get_texture((i + j) % 4));
+                let t_entity = Transform::from(
+                    vec3(i as f32 * 100.0,j as f32 * 100.0, 0.0),
+                    vec3(100.0, 100.0, 0.0),
+                );
+                let entity = scene.spawn(&format!("{}", i*10+j))?;
+                entity.add(t_entity)?;
+                entity.attach(r_entity)?;
+                entity.get::<Transform>()?;
+                scene.get(&format!("{}", i*10+j))?.get::<Transform>()?;
+            }
+        }
+        /*
+        let r_entity = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture((0) % 4));
+        let t_entity = Transform::from(
+            vec3(0 as f32 * 10.0,0 as f32 * 10.0, 0.0),
+            vec3(10.0, 10.0, 0.0),
+        );
+        let entity = scene.spawn(&format!("{}", 0))?;
+        entity.add(t_entity)?;
+        entity.attach(r_entity)?;let r_entity = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture((1) % 4));
+        let t_entity = Transform::from(
+            vec3(1 as f32 * 10.0,0 as f32 * 10.0, 0.0),
+            vec3(10.0, 10.0, 0.0),
+        );
+        let entity = scene.spawn(&format!("{}", 1))?;
+        entity.add(t_entity)?;
+        entity.attach(r_entity)?;
+        let r_entity = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture((2) % 4));
+        let t_entity = Transform::from(
+            vec3(2 as f32 * 10.0,0 as f32 * 10.0, 0.0),
+            vec3(10.0, 10.0, 0.0),
+        );
+        let entity = scene.spawn(&format!("{}", 2))?;
+        entity.add(t_entity)?;
+        entity.attach(r_entity)?;
+        let r_entity = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture((3) % 4));
+        let t_entity = Transform::from(
+            vec3(3 as f32 * 10.0,0 as f32 * 10.0, 0.0),
+            vec3(10.0, 10.0, 0.0),
+        );
+        let entity = scene.spawn(&format!("{}", 3))?;
+        entity.add(t_entity)?;
+        entity.attach(r_entity)?;
+        let r_entity = SpriteRenderer::from(
+            vec4(1.0, 1.0, 1.0, 1.0),
+            spritesheet.get_texture((4) % 4));
+        let t_entity = Transform::from(
+            vec3(4 as f32 * 10.0,0 as f32 * 10.0, 0.0),
+            vec3(10.0, 10.0, 0.0),
+        );
+        let entity = scene.spawn(&format!("{}", 4))?;
+        entity.add(t_entity)?;
+        entity.attach(r_entity)?;
+        */
+        world.set_scene("main")?;
+
+        Ok(())
+    }
+
+    fn many_entity_update(world: &mut World, _dt: f64) -> RageResult {
+        let e = world.get_scene("main")?.get("0")?;
+        e.get::<Transform>()?;
+        Ok(())
+    }
+
+    #[test]
+    pub fn many_entity_test() -> RageResult {
+        World::new()
+            .on_start(many_entity_init)
+            .on_update(many_entity_update)
+            .set_config(Config::default())
+            .run()
+    }
+    
+    fn s_init(world: &mut World) -> RageResult {
         let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
 
         ////////////////////////////
@@ -68,7 +159,7 @@ mod tests {
         Ok(())
     }
 
-    #[test]
+    //#[test]
     pub fn pog() -> RageResult {
         // Setup
         let config: Config = Config::default();

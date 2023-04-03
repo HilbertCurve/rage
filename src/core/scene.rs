@@ -87,22 +87,35 @@ impl Scene {
         self.e_vec.push(Entity::new(name.to_owned()));
         Ok(self.e_vec.last_mut().expect("entity creation failed"))
     }
-    pub fn despawn(&mut self, entity: &mut Entity) -> Result<(), SceneError> {
+    pub fn despawn(&mut self, name: &str) -> Result<(), SceneError> {
         // search and remove
         for i in 0..self.e_vec.len() {
-            if &self.e_vec[i] == entity {
+            if &self.e_vec[i].name() == name {
                 self.e_vec.remove(i);
                 return Ok(());
             }
         }
         Err(SceneError::new(
-                &format!("Entity of name: {}, id: {} not found in Scene of name: {} id: {}",
-                         entity.name(), entity.id(),
-                         self.name, self.id)))
+                &format!("Entity of name: {} not found in Scene of name: {}",
+                         name,
+                         self.name)))
+    }
+    pub fn get(&mut self, name: &str) -> Result<&mut Entity, SceneError> {
+        for i in 0..self.e_vec.len() {
+            if &self.e_vec[i].name() == name {
+                return Ok(&mut self.e_vec[i]);
+            }
+        }
+
+        Err(SceneError::new(&format!("Entity of name: {} not found in Scene of name: {}", name, self.name)))
     }
     pub fn update<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
         for i in 0..self.e_vec.len() {
-            self.e_vec[i].update::<T>()?;
+            match self.e_vec[i].update::<T>() {
+                Ok(_) => {}
+                Err(ComponentError::NotPresent(_)) => {}
+                Err(err) => return Err(err)
+            }
         }
         Ok(())
     }

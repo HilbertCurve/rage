@@ -1,9 +1,9 @@
 pub use rage_macros::Component as component_derive;
 
-use super::entity::Entity;
-
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
+
+use super::entity::Entity;
 
 #[derive(Debug)]
 pub enum ComponentError {
@@ -36,9 +36,6 @@ pub trait Component: 'static + Send {
 }
 
 pub trait DynComponent: 'static + Component {
-    fn get_parent(&self) -> Option<&Entity>;
-    fn set_parent(&mut self, parent: &Entity);
-    fn detach(&mut self);
-    fn update(&mut self) -> Result<(), ComponentError>;
+    unsafe fn update(&mut self, parent: *mut Entity) -> Result<(), ComponentError>;
 }
 

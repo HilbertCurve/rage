@@ -69,4 +69,5 @@ Misc:
 
 Known bugs:
 - [+] Fix gl::Viewport; currently items clip off of the screen easily
-
+- [+] Fix Spritesheet vertical texture wrapping
+- [+] Fix DynComponent null parent problem - passing pointers as function arguments B)
