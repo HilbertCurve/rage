@@ -106,5 +106,12 @@ impl Spritesheet {
     pub fn get_source(&self) -> &str {
         &self.src
     }
+
+    pub fn empty_tex() -> Texture {
+        Texture {
+            id: 0,
+            uvs: [0.0;8],
+        }
+    }
 }
 

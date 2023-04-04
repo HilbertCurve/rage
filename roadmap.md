@@ -1,5 +1,5 @@
 rage game engine progress:
-thank goodness rust has an automatic build system
+thank goodness rust has an automatic build system - I'm no good at cpp :P
 
 Renderer:
 - [x] Get window working
@@ -27,7 +27,7 @@ Core:
 - [x] Misc. config through config.rs
 - [x] Scenes - this should wait until ecs is working
 - [x] Blocks - data chunks, primarily for renderer
-- [ ] World - delta time, configuration, WorldBuilder
+- [x] World - delta time, configuration, WorldBuilder
 
 ECS: Entity Component System
 What if we had scenes create objects that are manipulated on the fly? Kinda like the factory pattern?
@@ -39,8 +39,8 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Scenes - collection of entities that can be updated en masse
 - [x] Basic sprite renderer
 - [-] Scene function pointer integration - moved to World
-- [+] Scene names
-- [+] Entity names
+- [x] Scene names
+- [x] Entity names
 
 Audio:
 - [ ] Audio setup (find OpenAL bindings)
@@ -59,7 +59,7 @@ State Machines:
 
 Tests:
 - [ ] More block tests; edge cases
-- [+] Scene change test
+- [x] Scene change test
 
 Misc:
 - [ ] Make README
@@ -68,6 +68,6 @@ Misc:
 - [-] ChainError - wouldn't have much use, as many functions fail at library level, and most errors can be debugged without too much trouble
 
 Known bugs:
-- [+] Fix gl::Viewport; currently items clip off of the screen easily
-- [+] Fix Spritesheet vertical texture wrapping
-- [+] Fix DynComponent null parent problem - passing pointers as function arguments B)
+- [x] Fix gl::Viewport; currently items clip off of the screen easily - `window.set_size_polling(true)` needed
+- [x] Fix Spritesheet vertical texture wrapping - improper `.floor()`
+- [x] Fix DynComponent null parent problem - passing pointers as function arguments B)

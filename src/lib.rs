@@ -3,6 +3,7 @@ extern crate lazy_static;
 #[macro_use]
 pub extern crate rage_macros;
 
+//pub mod audio;
 pub mod core;
 pub mod ecs;
 pub mod renderer;
@@ -24,14 +25,14 @@ mod tests {
         let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
 
         let scene = world.new_scene("main")?;
-        for i in 0..10 {
+        for i in 0..30 {
             for j in 0..10 {
                 let r_entity = SpriteRenderer::from(
                     vec4(1.0, 1.0, 1.0, 1.0),
                     spritesheet.get_texture((i + j) % 4));
                 let t_entity = Transform::from(
-                    vec3(i as f32 * 100.0,j as f32 * 100.0, 0.0),
-                    vec3(100.0, 100.0, 0.0),
+                    vec3(i as f32 * 10.0,j as f32 * 10.0, 0.0),
+                    vec3(10.0, 10.0, 0.0),
                 );
                 let entity = scene.spawn(&format!("{}", i*10+j))?;
                 entity.add(t_entity)?;
@@ -40,65 +41,21 @@ mod tests {
                 scene.get(&format!("{}", i*10+j))?.get::<Transform>()?;
             }
         }
-        /*
-        let r_entity = SpriteRenderer::from(
-            vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture((0) % 4));
-        let t_entity = Transform::from(
-            vec3(0 as f32 * 10.0,0 as f32 * 10.0, 0.0),
-            vec3(10.0, 10.0, 0.0),
-        );
-        let entity = scene.spawn(&format!("{}", 0))?;
-        entity.add(t_entity)?;
-        entity.attach(r_entity)?;let r_entity = SpriteRenderer::from(
-            vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture((1) % 4));
-        let t_entity = Transform::from(
-            vec3(1 as f32 * 10.0,0 as f32 * 10.0, 0.0),
-            vec3(10.0, 10.0, 0.0),
-        );
-        let entity = scene.spawn(&format!("{}", 1))?;
-        entity.add(t_entity)?;
-        entity.attach(r_entity)?;
-        let r_entity = SpriteRenderer::from(
-            vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture((2) % 4));
-        let t_entity = Transform::from(
-            vec3(2 as f32 * 10.0,0 as f32 * 10.0, 0.0),
-            vec3(10.0, 10.0, 0.0),
-        );
-        let entity = scene.spawn(&format!("{}", 2))?;
-        entity.add(t_entity)?;
-        entity.attach(r_entity)?;
-        let r_entity = SpriteRenderer::from(
-            vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture((3) % 4));
-        let t_entity = Transform::from(
-            vec3(3 as f32 * 10.0,0 as f32 * 10.0, 0.0),
-            vec3(10.0, 10.0, 0.0),
-        );
-        let entity = scene.spawn(&format!("{}", 3))?;
-        entity.add(t_entity)?;
-        entity.attach(r_entity)?;
-        let r_entity = SpriteRenderer::from(
-            vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture((4) % 4));
-        let t_entity = Transform::from(
-            vec3(4 as f32 * 10.0,0 as f32 * 10.0, 0.0),
-            vec3(10.0, 10.0, 0.0),
-        );
-        let entity = scene.spawn(&format!("{}", 4))?;
-        entity.add(t_entity)?;
-        entity.attach(r_entity)?;
-        */
+
         world.set_scene("main")?;
 
         Ok(())
     }
 
-    fn many_entity_update(world: &mut World, _dt: f64) -> RageResult {
-        let e = world.get_scene("main")?.get("0")?;
-        e.get::<Transform>()?;
+    fn many_entity_update(world: &mut World) -> RageResult {
+        println!("Current fps: {}", world.fps());
+        static mut COUNT: usize = 0;
+        if keyboard::is_pressed(glfw::Key::Space) {
+            unsafe {
+                world.get_scene("main")?.despawn(&format!("{}", COUNT))?;
+                COUNT += 1;
+            }
+        }
         Ok(())
     }
 
@@ -151,7 +108,7 @@ mod tests {
 
         Ok(())
     }
-    fn s_update(world: &mut World, _dt: f64) -> RageResult {
+    fn s_update(world: &mut World) -> RageResult {
         world.set_scene("main")?;
         if keyboard::is_pressed(glfw::Key::Space) {
             world.set_scene("next")?;
@@ -173,26 +130,31 @@ mod tests {
 
 
 
+    #[test]
+    fn entity_test_attach_detach() -> RageResult {
+        let mut entity: Entity = Entity::new("test".to_owned());
+        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE, Spritesheet::empty_tex());
+        entity.attach(sprite_renderer)?;
+        entity.detach::<SpriteRenderer>()?;
 
+        let transform: Transform = Transform::zero();
 
+        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE, Spritesheet::empty_tex());
+        entity.attach(sprite_renderer)?;
+        entity.add(transform)?;
 
-    //#[test]
-    /*
-    fn it_works() -> Result<(), Box<dyn std::error::Error>> {
-        let mut app: World = World::new();
+        entity.detach::<SpriteRenderer>()?;
+        entity.remove::<Transform>()?;
 
-        let mut s_main: Scene = Scene::new();
-        s_main.set_start(s_init);
+        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE, Spritesheet::empty_tex());
+        entity.attach(sprite_renderer)?;
+        entity.add(transform)?;
 
-        let mut config: Config = Config::default();
-        config.window_height = 600;
-
-        //app.add_scene(s_main);
-        app.run(config);
+        entity.remove::<Transform>()?;
+        entity.detach::<SpriteRenderer>()?;
 
         Ok(())
     }
-    */
 
     #[test]
     fn block_test_push_pop() -> Result<(), BlockError> {

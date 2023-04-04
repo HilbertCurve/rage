@@ -14,11 +14,10 @@ use glam::*;
 pub type RageResult = Result<(), Box<dyn std::error::Error>>;
 type GlfwConf = (glfw::Glfw, glfw::Window, Receiver<(f64, glfw::WindowEvent)>);
 
-// TODO: move title to config
 const TITLE: &str = "Rage Game Engine";
 pub struct WorldBuilder {
     start_fn: fn(&mut World) -> RageResult,
-    update_fn: fn(&mut World, f64) -> RageResult,
+    update_fn: fn(&mut World) -> RageResult,
     config: Config,
 }
 
@@ -26,7 +25,7 @@ impl Default for WorldBuilder {
     fn default() -> WorldBuilder {
         WorldBuilder {
             start_fn: |_| Ok(()),
-            update_fn: |_, _| Ok(()),
+            update_fn: |_| Ok(()),
             config: Config::default(),
         }
     }
@@ -37,7 +36,7 @@ impl WorldBuilder {
         self.start_fn = start;
         self
     }
-    pub fn on_update(mut self, update: fn(&mut World, f64) -> RageResult) -> WorldBuilder {
+    pub fn on_update(mut self, update: fn(&mut World) -> RageResult) -> WorldBuilder {
         self.update_fn = update;
         self
     }
@@ -49,7 +48,8 @@ impl WorldBuilder {
         let built_world: World = World {
             scenes: vec![],
             uptime: 0.0,
-            current_fps: 0.0,
+            dt: 0.0001,
+            fps: 0.0,
             current_scene: String::new(),
             start: self.start_fn,
             update: self.update_fn,
@@ -62,10 +62,11 @@ pub struct World {
     // SceneManager?
     scenes: Vec<Scene>,
     uptime: f64,
-    current_fps: f64,
+    dt: f64,
+    fps: f64,
     current_scene: String,
     start: fn(&mut World) -> RageResult,
-    update: fn(&mut World, f64) -> RageResult,
+    update: fn(&mut World) -> RageResult,
     //...
 }
 
@@ -111,6 +112,9 @@ impl World {
             Ok(self.get_scene(&self.current_scene.clone()).expect("stinki!"))
         }
     }
+    pub fn fps(&self) -> f64 {
+        self.fps
+    }
 
     /// Initializes and runs program, consuming inputted configuration object.
     pub fn run(mut self, config: Config) -> RageResult {
@@ -122,17 +126,19 @@ impl World {
         let (mut glfw, mut window, events) = World::window_init()?;
         (self.start)(&mut self)?;
 
+        let mut t0: f64;
+        let mut t1: f64;
         while !window.should_close() {
+            t0 = glfw.get_time();
             glfw.poll_events();
             for (_, event) in glfw::flush_messages(&events) {
                 World::handle_window_event(&mut window, event);
             }
 
             //TODO: toggle which ones update in Config?
-            //TODO (critical): delta time!!!
-            (self.update)(&mut self, 0.0)?;
+            (self.update)(&mut self)?;
             self.current_scene()?.update::<SpriteRenderer>()?;
-            //self.get_scene(self.current_scene_id)?.update::<Collider>()?;
+          //self.current_scene()?.update::<Collider>()?;
             renderer::update();
 
             if keyboard::is_pressed(glfw::Key::A) {
@@ -143,10 +149,12 @@ impl World {
             }
 
             window.swap_buffers();
-            // self.uptime += dt;
-            // self.current_fps = 1.0 / dt;
-            self.uptime += 0.0;
-            self.current_fps = 0.0;
+
+            t1 = glfw.get_time();
+            let dt = t1 - t0;
+            self.uptime += dt;
+            self.dt = dt;
+            self.fps = 1.0 / dt;
         }
 
         Ok(())
