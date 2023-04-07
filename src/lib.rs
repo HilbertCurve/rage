@@ -3,7 +3,7 @@ extern crate lazy_static;
 #[macro_use]
 pub extern crate rage_macros;
 
-//pub mod audio;
+pub mod audio;
 pub mod core;
 pub mod ecs;
 pub mod renderer;
@@ -33,6 +33,7 @@ mod tests {
                 let t_entity = Transform::from(
                     vec3(i as f32 * 10.0,j as f32 * 10.0, 0.0),
                     vec3(10.0, 10.0, 0.0),
+                    Vec3::ZERO,
                 );
                 let entity = scene.spawn(&format!("{}", i*10+j))?;
                 entity.add(t_entity)?;
@@ -67,7 +68,8 @@ mod tests {
             .set_config(Config::default())
             .run()
     }
-    
+
+    #[allow(dead_code)]
     fn s_init(world: &mut World) -> RageResult {
         let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
 
@@ -77,11 +79,11 @@ mod tests {
         let r_player_0: SpriteRenderer = SpriteRenderer::from(
             vec4(1.0, 1.0, 1.0, 1.0),
             spritesheet.get_texture(0));
-        let t_player_0: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0));
+        let t_player_0: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
         let r_side_0: SpriteRenderer = SpriteRenderer::from(
             vec4(1.0, 1.0, 1.0, 1.0),
             spritesheet.get_texture(0));
-        let t_side_0: Transform = Transform::from(vec3(100.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0));
+        let t_side_0: Transform = Transform::from(vec3(100.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
 
         let scene = world.new_scene("main")?;
 
@@ -98,7 +100,7 @@ mod tests {
         let r_player_1: SpriteRenderer = SpriteRenderer::from(
             vec4(1.0, 1.0, 1.0, 1.0),
             spritesheet.get_texture(2));
-        let t_player_1: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0));
+        let t_player_1: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
 
         let scene = world.new_scene("next")?;
 
@@ -108,6 +110,7 @@ mod tests {
 
         Ok(())
     }
+    #[allow(dead_code)]
     fn s_update(world: &mut World) -> RageResult {
         world.set_scene("main")?;
         if keyboard::is_pressed(glfw::Key::Space) {
@@ -117,6 +120,7 @@ mod tests {
     }
 
     //#[test]
+    #[allow(dead_code)]
     pub fn pog() -> RageResult {
         // Setup
         let config: Config = Config::default();

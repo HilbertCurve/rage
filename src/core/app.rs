@@ -137,7 +137,8 @@ impl World {
 
             //TODO: toggle which ones update in Config?
             (self.update)(&mut self)?;
-            self.current_scene()?.update::<SpriteRenderer>()?;
+            let wdt = self.dt.clone();
+            self.current_scene()?.update::<SpriteRenderer>(wdt)?;
           //self.current_scene()?.update::<Collider>()?;
             renderer::update();
 

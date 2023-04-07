@@ -109,9 +109,9 @@ impl Scene {
 
         Err(SceneError::new(&format!("Entity of name: {} not found in Scene of name: {}", name, self.name)))
     }
-    pub fn update<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
+    pub fn update<T: DynComponent>(&mut self, dt: f64) -> Result<(), ComponentError> {
         for i in 0..self.e_vec.len() {
-            match self.e_vec[i].update::<T>() {
+            match self.e_vec[i].update::<T>(dt) {
                 Ok(_) => {}
                 Err(ComponentError::NotPresent(_)) => {}
                 Err(err) => return Err(err)

@@ -97,10 +97,10 @@ impl Entity {
         Err(ComponentError::NotPresent(T::type_str().to_owned()))
     }
 
-    pub fn update<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
+    pub fn update<T: DynComponent>(&mut self, dt: f64) -> Result<(), ComponentError> {
         let c = self as *mut Entity;
         unsafe {
-            self.get_mut::<T>()?.update(c)
+            self.get_mut::<T>()?.update(dt, c)
         }
     }
 

@@ -41,6 +41,12 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [-] Scene function pointer integration - moved to World
 - [x] Scene names
 - [x] Entity names
+- [ ] Refactor SpriteRenderer to `renderer` directory
+
+Resources: resource access, freeing, storing, etc.
+- [ ] Spritesheet - refactor here
+- [ ] AudioBuffer
+- [ ] etc (as they come along)
 
 Audio:
 - [ ] Audio setup (find OpenAL bindings)

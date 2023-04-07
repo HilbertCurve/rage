@@ -36,6 +36,8 @@ pub trait Component: 'static + Send {
 }
 
 pub trait DynComponent: 'static + Component {
-    unsafe fn update(&mut self, parent: *mut Entity) -> Result<(), ComponentError>;
+    unsafe fn start(&mut self, parent: *mut Entity) -> Result<(), ComponentError>;
+    unsafe fn update(&mut self, dt: f64, parent: *mut Entity) -> Result<(), ComponentError>;
+    unsafe fn clean(&mut self, parent: *mut Entity) -> Result<(), ComponentError>;
 }
 

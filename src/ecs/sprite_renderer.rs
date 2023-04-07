@@ -31,13 +31,20 @@ impl SpriteRenderer {
 unsafe impl Send for SpriteRenderer {}
 
 impl DynComponent for SpriteRenderer {
-    unsafe fn update(&mut self, parent: *mut Entity) -> Result<(), ComponentError> {
+    unsafe fn start(&mut self, _parent: *mut Entity) -> Result<(), ComponentError> {
+        Ok(())
+    }
+    unsafe fn update(&mut self, _dt: f64, parent: *mut Entity) -> Result<(), ComponentError> {
         self.trans_cache = (*parent).get::<Transform>()?.clone();
         if let Err(err) = self.to_buffer(&mut DEFAULT_VB) {
             Err(ComponentError::BadUpdate(format!("Buffering failed: {}", err)))
         } else {
             Ok(())
         }
+    }
+    unsafe fn clean(&mut self, _parent: *mut Entity) -> Result<(), ComponentError> {
+        //TODO: is there something to clean here???
+        Ok(())
     }
 }
 
@@ -71,15 +78,23 @@ impl Renderable for SpriteRenderer {
         }
 
         let corners: [Vec3; 4] = [
-            trans.pos + Vec3::new( trans.whd.x,  trans.whd.y, 0.0) / 2.0,
-            trans.pos + Vec3::new(-trans.whd.x,  trans.whd.y, 0.0) / 2.0,
-            trans.pos + Vec3::new(-trans.whd.x, -trans.whd.y, 0.0) / 2.0,
-            trans.pos + Vec3::new( trans.whd.x, -trans.whd.y, 0.0) / 2.0,
+            Vec3::new( trans.whd.x,  trans.whd.y, 0.0) / 2.0,
+            Vec3::new(-trans.whd.x,  trans.whd.y, 0.0) / 2.0,
+            Vec3::new(-trans.whd.x, -trans.whd.y, 0.0) / 2.0,
+            Vec3::new( trans.whd.x, -trans.whd.y, 0.0) / 2.0,
         ];
 
+        // rotation: gimbal rotation, from x to y to z
+        let rotation = glam::Mat4::from_rotation_x(trans.rot.x) * 
+                       glam::Mat4::from_rotation_y(trans.rot.y) * 
+                       glam::Mat4::from_rotation_z(trans.rot.z);
+        let translation = glam::Mat4::from_translation(trans.pos);
+
         let mut acc = 0;
-        for corner in corners {
+        for mut corner in corners {
             // buffer vertex
+
+            corner = (translation * rotation * Vec4::from((corner, 1.0))).truncate();
 
             // NOTE: it's ok to set a float to 0x00000000, that evaluates to 0.0
             for _ in 0..buf.layout_len() {
