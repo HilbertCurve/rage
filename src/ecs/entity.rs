@@ -45,6 +45,7 @@ impl Entity {
         }
 
         self.components.push(Box::new(com));
+        self.start::<T>()?;
 
         Ok(())
     }
@@ -67,6 +68,7 @@ impl Entity {
         let mut acc: usize = 0;
         for g_com in &mut self.components {
             if let Some(_) = g_com.as_any_mut().downcast_mut::<T>() {
+                self.stop::<T>()?;
                 self.components.remove(acc);
                 return Ok(());
             } else {
@@ -97,10 +99,24 @@ impl Entity {
         Err(ComponentError::NotPresent(T::type_str().to_owned()))
     }
 
+    fn start<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
+        let c = self as *mut Entity;
+        unsafe {
+            self.get_mut::<T>()?.start(c)
+        }
+    }
+
     pub fn update<T: DynComponent>(&mut self, dt: f64) -> Result<(), ComponentError> {
         let c = self as *mut Entity;
         unsafe {
             self.get_mut::<T>()?.update(dt, c)
+        }
+    }
+
+    fn stop<T: DynComponent>(&mut self) -> Result<(), ComponentError> {
+        let c = self as *mut Entity;
+        unsafe {
+            self.get_mut::<T>()?.stop(c)
         }
     }
 

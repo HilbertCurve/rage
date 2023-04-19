@@ -49,10 +49,8 @@ Resources: resource access, freeing, storing, etc.
 - [ ] etc (as they come along)
 
 Audio:
-- [ ] Audio setup (find OpenAL bindings)
-- [ ] AudioController
-- [ ] AudioListener
-- [ ] AudioSource
+- [ ] Temporary rodio implementation
+- [ ] Sometime, shift to pure cpal implementation
 
 Physics: Main controller -> RigidBody factory. Collider is the component form of a RigidBody, and there's a 1-to-1 correspondence between created components and RigidBody's (to be managed by a custom drop() function).
 - [ ] Framework - set up the physics factory

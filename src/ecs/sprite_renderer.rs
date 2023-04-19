@@ -42,7 +42,7 @@ impl DynComponent for SpriteRenderer {
             Ok(())
         }
     }
-    unsafe fn clean(&mut self, _parent: *mut Entity) -> Result<(), ComponentError> {
+    unsafe fn stop(&mut self, _parent: *mut Entity) -> Result<(), ComponentError> {
         //TODO: is there something to clean here???
         Ok(())
     }

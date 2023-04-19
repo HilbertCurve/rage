@@ -1,6 +1,8 @@
 use std::any;
 use std::error::Error;
 use std::fmt::{self, Display};
+use std::fs::File;
+use std::io::Read;
 use std::mem;
 use std::ops::{Index, IndexMut};
 use std::slice;
@@ -138,9 +140,28 @@ impl Block {
         ret
     }
 
+    pub fn remove_bytes(&mut self, start: usize, len: usize) -> Result<(), BlockError> {
+        if start + len > self.len() {
+            Err(BlockError::Overflow(start + len - self.len()))
+        } else {
+            // there's gotta be a better way to do this
+            for i in start..start+len {
+                self.data.remove(i);
+            }
+            Ok(())
+        }
+    }
+
     #[inline]
     pub fn as_ptr(&self) -> *const u8 {
         self.data.as_ptr()
+    }
+
+    pub fn from_file(f: &mut File) -> Result<Block, std::io::Error> {
+        let mut ret: Block = Block::empty();
+        f.read_to_end(&mut ret.data)?;
+
+        Ok(ret)
     }
 
     pub fn print<T: Copy + Display>(&self) {

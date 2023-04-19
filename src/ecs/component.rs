@@ -28,7 +28,7 @@ impl Display for ComponentError {
     }
 }
 
-pub trait Component: 'static + Send {
+pub trait Component: 'static {
     fn as_any(&self) -> &dyn std::any::Any;
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
     // TODO: flawed: use better type checking
@@ -36,8 +36,18 @@ pub trait Component: 'static + Send {
 }
 
 pub trait DynComponent: 'static + Component {
+    /// Starts the component, initializing any resources and running preliminary checks.
+    /// 
+    /// It is *highly* suggested that you don't reference any of `parent`'s components in 
+    /// this function, as it might not be known what components are added in whichever order,
+    /// and is therefore undefined behavior.
     unsafe fn start(&mut self, parent: *mut Entity) -> Result<(), ComponentError>;
+    /// Updates the component with a given delta time.
     unsafe fn update(&mut self, dt: f64, parent: *mut Entity) -> Result<(), ComponentError>;
-    unsafe fn clean(&mut self, parent: *mut Entity) -> Result<(), ComponentError>;
+    /// Stops the component, releasing any resources and running extra checks.
+    /// 
+    /// It is *highly* suggested that you don't reference any of `parent`'s components in 
+    /// this function, as it might not be known what components are removed in whichever order,
+    /// and is therefore undefined behavior.
+    unsafe fn stop(&mut self, parent: *mut Entity) -> Result<(), ComponentError>;
 }
-

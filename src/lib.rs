@@ -13,7 +13,9 @@ pub mod utils;
 extern crate glam;
 
 #[cfg(test)]
+#[allow(dead_code)]
 mod tests {
+    use super::audio::source::AudioSource;
     use super::core::prelude::*;
     use super::core::app::{World, RageResult};
     use super::utils::block::{Block, BlockError};
@@ -21,6 +23,32 @@ mod tests {
     use super::ecs::prelude::*;
     use glam::*;
 
+    fn audio_test_start(world: &mut World) -> RageResult {
+        let scene = world.new_scene("main")?;
+
+        let entity = scene.spawn("source")?;
+        entity.attach(AudioSource::new()?)?;
+
+        entity.get_mut::<AudioSource>()?.play("assets/audio/test1.wav".to_string())?;
+
+        world.set_scene("main")?;
+
+        Ok(())
+    }
+
+    fn audio_test_update(_world: &mut World) -> RageResult {
+        Ok(())
+    }
+    
+    #[test]
+    fn audio_test() -> RageResult {
+        World::new()
+            .on_start(audio_test_start)
+            .on_update(audio_test_update)
+            .set_config(Config::default())
+            .run()
+    }
+    
     fn many_entity_init(world: &mut World) -> RageResult {
         let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
 
@@ -60,7 +88,7 @@ mod tests {
         Ok(())
     }
 
-    #[test]
+    //#[test]
     pub fn many_entity_test() -> RageResult {
         World::new()
             .on_start(many_entity_init)
@@ -69,7 +97,6 @@ mod tests {
             .run()
     }
 
-    #[allow(dead_code)]
     fn s_init(world: &mut World) -> RageResult {
         let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
 

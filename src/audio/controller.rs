@@ -1,10 +1,23 @@
-use openal;
-
 use std::error::Error;
 use std::fmt::{self, Display};
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 
-static mut AL_LISTENER: Option<Mutex<openal::Listener<'static>>> = None;
+use glam::Vec3;
+use rodio::{OutputStreamHandle, OutputStream, PlayError};
+
+struct AudioController {
+    /// position of "listener"
+    /// TODO: implement this in audio mixing
+    pos: Vec3,
+}
+
+impl AudioController {
+    pub fn new() -> AudioController {
+        AudioController {
+            pos: Vec3::ZERO,
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct AudioError {
@@ -19,20 +32,14 @@ impl Display for AudioError {
     }
 }
 
-impl From<openal::Error> for AudioError {
-    fn from(e: openal::Error) -> Self {
-        AudioError { what: format!("OpenAL error: {}", e) }
+impl From<PlayError> for AudioError {
+    fn from(err: PlayError) -> Self {
+        AudioError {
+            what: err.to_string()
+        }
     }
 }
 
-pub fn start() -> Result<(), AudioError> {
-    unsafe {
-        AL_LISTENER = Some(Mutex::new(openal::listener::default(&openal::listener::Attributes::default())?))
-    }
-
-    Ok(())
-}
-
-pub fn update() -> Result<(), AudioError> {
+pub fn update(_dt: f64) -> Result<(), AudioError> {
     Ok(())
 }
