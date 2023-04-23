@@ -6,6 +6,7 @@ use crate::utils::error::UnsupportedError;
 
 use std::error;
 
+#[derive(Copy, Clone)]
 pub struct Texture {
     pub id: u32,
     pub uvs: [f32; 8],
@@ -45,7 +46,7 @@ impl Spritesheet {
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
         }
 
-        let texture = image::open(&src)?;
+        let texture = image::open(&src)?.flipv();
 
         let (pixels, channels, width, height) = match texture {
             DynamicImage::ImageRgb8(img) => (Block::from_vec(img.as_raw()), 3, img.width(), img.height()),
@@ -70,6 +71,20 @@ impl Spritesheet {
         Ok(Spritesheet { id, src: src.clone(), width, height, s_width, s_height, padding })
     }
 
+    /// Padding as such: <br>
+    /// `- | +`: padding <br>
+    /// `.`: image pixels <br>
+    /// ```
+    /// ...|...|...|...|...|...|
+    /// ...|...|...|...|...|...|
+    /// ---+---+---+---+---+---+
+    /// ...|...|...|...|...|...|
+    /// ...|...|...|...|...|...|
+    /// ---+---+---+---+---+---+
+    /// ...|...|...|...|...|...|
+    /// ...|...|...|...|...|...|
+    /// ---+---+---+---+---+---+
+    /// ```
     pub fn get_texture(&self, index: usize) -> Texture {
         // get offset from top
         let from_top = ((index as f32 * self.s_width as f32 / self.width as f32).floor()
@@ -113,5 +128,16 @@ impl Spritesheet {
             uvs: [0.0;8],
         }
     }
-}
 
+    pub fn as_vec(&self) -> Vec<Texture> {
+        let width_count = self.width / (self.s_width + self.padding);
+        let height_count = self.height / (self.s_height + self.padding);
+
+        let mut ret: Vec<Texture> = vec![];
+        for i in 0..width_count * height_count {
+            ret.push(self.get_texture(i as usize))
+        }
+
+        ret
+    }
+}

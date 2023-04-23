@@ -1,23 +1,7 @@
 use std::error::Error;
 use std::fmt::{self, Display};
-use std::sync::{Mutex, Arc};
 
-use glam::Vec3;
-use rodio::{OutputStreamHandle, OutputStream, PlayError};
-
-struct AudioController {
-    /// position of "listener"
-    /// TODO: implement this in audio mixing
-    pos: Vec3,
-}
-
-impl AudioController {
-    pub fn new() -> AudioController {
-        AudioController {
-            pos: Vec3::ZERO,
-        }
-    }
-}
+use rodio::PlayError;
 
 #[derive(Debug)]
 pub struct AudioError {
@@ -36,6 +20,21 @@ impl From<PlayError> for AudioError {
     fn from(err: PlayError) -> Self {
         AudioError {
             what: err.to_string()
+        }
+    }
+}
+
+impl From<String> for AudioError {
+    fn from(str: String) -> Self {
+        AudioError {
+            what: str
+        }
+    }
+}
+impl From<&str> for AudioError {
+    fn from(str: &str) -> Self {
+        AudioError {
+            what: str.to_owned()
         }
     }
 }

@@ -115,6 +115,9 @@ impl World {
     pub fn fps(&self) -> f64 {
         self.fps
     }
+    pub fn dt(&self) -> f64 {
+        self.dt
+    }
 
     /// Initializes and runs program, consuming inputted configuration object.
     pub fn run(mut self, config: Config) -> RageResult {

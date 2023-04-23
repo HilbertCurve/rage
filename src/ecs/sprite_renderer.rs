@@ -1,10 +1,10 @@
 use glam::{Vec3, Vec4};
 
-use crate::ecs::{
+use crate::{ecs::{
     component::{Component, ComponentError, DynComponent},
     entity::Entity,
     transform::Transform,
-};
+}, renderer::texture::Spritesheet};
 use crate::renderer::{
     buffer::{VertexBuffer, VProp, VType},
     renderer::{DEFAULT_VB, Renderable, RenderError},
@@ -14,21 +14,88 @@ use crate::renderer::{
 #[derive(Component)]
 pub struct SpriteRenderer {
     pub color: Vec4,
-    pub texture: Texture,
+    pub textures: Vec<Texture>,
+    cur_tex: usize,
     trans_cache: Transform,
 }
 
 impl SpriteRenderer {
-    pub fn from(color: Vec4, texture: Texture) -> SpriteRenderer {
+    /// Create a SpriteRenderer from frames `start..end` in a Spritesheet.
+    pub fn slice(color: Vec4, sheet: &Spritesheet, start: usize, end: usize) -> SpriteRenderer {
         SpriteRenderer {
             color,
-            texture,
+            textures: sheet.as_vec()[start..end].to_vec(),
+            cur_tex: 0,
             trans_cache: Transform::zero(),
         }
+    }
+    /// Advances this SpriteRenderer to the next frame.
+    pub fn next_frame(&mut self) -> Result<(), ComponentError> {
+        if self.cur_tex + 1 >= self.textures.len() {
+            Err(ComponentError::InvalidOp)
+        } else {
+            self.cur_tex += 1;
+            Ok(())
+        }
+    }
+    /// Backtracks this SpriteRenderer to the previous frame.
+    pub fn prev_frame(&mut self) -> Result<(), ComponentError> {
+        if self.cur_tex - 1 <= 0 {
+            Err(ComponentError::InvalidOp)
+        } else {
+            self.cur_tex -= 1;
+            Ok(())
+        }
+    }
+    /// Advances this SpriteRenderer to the next frame, looping to 
+    /// the first frame if it overflows.
+    #[inline]
+    pub fn next_wrap(&mut self) {
+        if let Err(_) = self.next_frame() {
+            self.cur_tex = 0;
+        }
+    }
+    /// Backtracks this SpriteRenderer to the previous frame, looping
+    /// to the last frame if it underflows.
+    #[inline]
+    pub fn prev_wrap(&mut self) {
+        if let Err(_) = self.prev_frame() {
+            self.cur_tex = self.textures.len() - 1;
+        }
+    }
+    /// Sets this SpriteRenderer to the first frame of it's animation.
+    #[inline]
+    pub fn first_frame(&mut self) {
+        self.cur_tex = 0;
+    }
+    /// Sets this SpriteRenderer to the last frame of it's animation.
+    #[inline]
+    pub fn last_frame(&mut self) {
+        self.cur_tex = self.textures.len() - 1;
     }
 }
 
 unsafe impl Send for SpriteRenderer {}
+
+impl From<Vec4> for SpriteRenderer {
+    fn from(color: Vec4) -> Self {
+        SpriteRenderer {
+            color: color,
+            textures: vec![Spritesheet::empty_tex()],
+            cur_tex: 0,
+            trans_cache: Transform::zero() }
+    }
+}
+
+impl From<&Spritesheet> for SpriteRenderer {
+    fn from(sheet: &Spritesheet) -> Self {
+        SpriteRenderer {
+            color: Vec4::ONE,
+            textures: sheet.as_vec(),
+            cur_tex: 0,
+            trans_cache: Transform::zero() }
+    }
+}
 
 impl DynComponent for SpriteRenderer {
     unsafe fn start(&mut self, _parent: *mut Entity) -> Result<(), ComponentError> {
@@ -85,9 +152,9 @@ impl Renderable for SpriteRenderer {
         ];
 
         // rotation: gimbal rotation, from x to y to z
-        let rotation = glam::Mat4::from_rotation_x(trans.rot.x) * 
+        let rotation = (glam::Mat4::from_rotation_x(trans.rot.x) * 
                        glam::Mat4::from_rotation_y(trans.rot.y) * 
-                       glam::Mat4::from_rotation_z(trans.rot.z);
+                       glam::Mat4::from_rotation_z(trans.rot.z)).inverse();
         let translation = glam::Mat4::from_translation(trans.pos);
 
         let mut acc = 0;
@@ -116,12 +183,12 @@ impl Renderable for SpriteRenderer {
             for i in 0..2 {
                 buf.vb.set(
                     offset + (tuv_pos + i) * tuv_type_enum.size_bytes(),
-                    self.texture.uvs[acc+i])
+                    self.textures[self.cur_tex].uvs[acc+i])
                     .or(Err(RenderError::from(&format!("bad block insertion"))))?;
             }
             buf.vb.set(
                 offset + tid_pos * tid_type_enum.size_bytes(),
-                self.texture.id as f32)
+                self.textures[self.cur_tex].id as f32)
                 .or(Err(RenderError::from(&format!("bad block insertion"))))?;
 
             offset += buf.layout_len() as usize;

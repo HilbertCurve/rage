@@ -6,10 +6,11 @@ pub mod scene;
 pub mod window;
 
 pub mod prelude {
-    pub mod app {
-        pub use crate::core::app::World;
-    }
+    pub use crate::core::app::World;
     pub use super::config::Config;
+    pub use crate::core::scene::Scene;
+    pub use crate::core::app::RageResult;
+
     pub mod mouse {
         pub use crate::core::mouse::{
             is_pressed,
@@ -19,12 +20,11 @@ pub mod prelude {
             scroll_y,
         };
     }
+
     pub mod keyboard {
         pub use crate::core::keyboard::is_pressed;
     }
-    pub mod scene {
-        pub use crate::core::scene::Scene;
-    }
+
     pub mod window {
         pub use crate::core::window::{
             get_width_height,

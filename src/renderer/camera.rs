@@ -27,7 +27,7 @@ impl Camera {
     fn new() -> Camera {
         Camera {
             pos: Vec3::new(0.0, 0.0, 1.0),
-            orient: Quat::from_xyzw(0.0, 0.0, 0.0, 1.0),
+            orient: Quat::from_xyzw(0.0, 0.0, 0.0, 0.0),
             // TODO: specify these in config.rs
             fov: PI / 3.0,
             zoom: 1.0,

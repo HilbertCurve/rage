@@ -45,7 +45,7 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 
 Resources: resource access, freeing, storing, etc.
 - [ ] Spritesheet - refactor here
-- [ ] AudioBuffer
+- [ ] WAVFile
 - [ ] etc (as they come along)
 
 Audio:

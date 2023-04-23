@@ -17,26 +17,77 @@ extern crate glam;
 mod tests {
     use super::audio::source::AudioSource;
     use super::core::prelude::*;
-    use super::core::app::{World, RageResult};
     use super::utils::block::{Block, BlockError};
     use super::renderer::texture::Spritesheet;
     use super::ecs::prelude::*;
     use glam::*;
 
-    fn audio_test_start(world: &mut World) -> RageResult {
+    fn hearts_start(world: &mut World) -> RageResult {
         let scene = world.new_scene("main")?;
 
-        let entity = scene.spawn("source")?;
-        entity.attach(AudioSource::new()?)?;
+        let hearts: Spritesheet = Spritesheet::from("assets/textures/hearts.png".to_owned(), 16, 16, 0)?;
 
-        entity.get_mut::<AudioSource>()?.play("assets/audio/test1.wav".to_string())?;
+        let entity = scene.spawn("main")?;
+        entity.attach(SpriteRenderer::from(&hearts))?;
+        entity.add(Transform::from(
+            Vec3::ZERO,
+            Vec3::from((250.0, 250.0, 50.0)),
+            Vec3::from((0.0, 0.0, 0.0)),
+        ))?;
 
         world.set_scene("main")?;
 
         Ok(())
     }
 
-    fn audio_test_update(_world: &mut World) -> RageResult {
+    fn hearts_update(world: &mut World) -> RageResult {
+        
+        static mut ELAPSED_TIME: f64 = 0.0;
+        unsafe {
+            ELAPSED_TIME += world.dt();
+            if ELAPSED_TIME >= 0.25 {
+                world
+                    .get_scene("main")?
+                    .get("main")?
+                    .get_mut::<SpriteRenderer>()?
+                    .next_wrap();
+                ELAPSED_TIME = 0.0;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    pub fn hearts_test() -> RageResult {
+        World::new()
+            .on_start(hearts_start)
+            .on_update(hearts_update)
+            .set_config(Config::default())
+            .run()
+
+    }
+    
+    fn audio_test_start(world: &mut World) -> RageResult {
+        let scene = world.new_scene("main")?;
+
+        let entity = scene.spawn("source")?;
+        entity.attach(AudioSource::new()?)?;
+
+        entity.get_mut::<AudioSource>()?.play("/home/ben/Desktop/lakes.wav".to_string())?;
+
+        world.set_scene("main")?;
+
+        Ok(())
+    }
+
+    fn audio_test_update(world: &mut World) -> RageResult {
+        let entity = world.get_scene("main")?.get("source")?;
+        if keyboard::is_pressed(glfw::Key::Space) {
+            entity.get_mut::<AudioSource>()?.pause()?;
+        } else {
+            entity.get_mut::<AudioSource>()?.resume()?;
+        }
         Ok(())
     }
     
@@ -48,26 +99,39 @@ mod tests {
             .set_config(Config::default())
             .run()
     }
+
+    const GRAPH: [u8;42] = [
+        0, 1, 1, 0, 1, 1, 0,
+        1, 2, 2, 1, 2, 2, 1,
+        1, 2, 2, 2, 2, 2, 1,
+        0, 1, 2, 2, 2, 1, 0,
+        0, 0, 1, 2, 1, 0, 0,
+        0, 0, 0, 1, 0, 0, 0,
+    ];
     
     fn many_entity_init(world: &mut World) -> RageResult {
-        let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
-
         let scene = world.new_scene("main")?;
-        for i in 0..30 {
-            for j in 0..10 {
-                let r_entity = SpriteRenderer::from(
-                    vec4(1.0, 1.0, 1.0, 1.0),
-                    spritesheet.get_texture((i + j) % 4));
-                let t_entity = Transform::from(
-                    vec3(i as f32 * 10.0,j as f32 * 10.0, 0.0),
-                    vec3(10.0, 10.0, 0.0),
-                    Vec3::ZERO,
-                );
-                let entity = scene.spawn(&format!("{}", i*10+j))?;
-                entity.add(t_entity)?;
-                entity.attach(r_entity)?;
-                entity.get::<Transform>()?;
-                scene.get(&format!("{}", i*10+j))?.get::<Transform>()?;
+        for i in 0..6 {
+            for j in 0..7 {
+                if GRAPH[i*7+j] != 0 {
+                    let mut col: Vec3 = Vec3::ZERO;
+                    if GRAPH[i*7+j] == 2 {
+                        col = Vec3::new(1.0, 0.1, 0.45); 
+                    } else if GRAPH[i*7+j] == 1 {
+                        col = Vec3::new(1.0, 0.1, 0.2);
+                    }
+                    let r_entity = SpriteRenderer::from(col.extend(1.0));
+                    let t_entity = Transform::from(
+                        vec3(j as f32 * 50.0 - 50.0 * 3.5, -(i as f32 * 50.0) + (50.0 * 3.0), 0.0),
+                        vec3(50.0, 50.0, 0.0),
+                        Vec3::ZERO,
+                    );
+                    let entity = scene.spawn(&format!("{}", i*10+j))?;
+                    entity.add(t_entity)?;
+                    entity.attach(r_entity)?;
+                    entity.get::<Transform>()?;
+                    scene.get(&format!("{}", i*10+j))?.get::<Transform>()?;
+                }
             }
         }
 
@@ -79,16 +143,10 @@ mod tests {
     fn many_entity_update(world: &mut World) -> RageResult {
         println!("Current fps: {}", world.fps());
         static mut COUNT: usize = 0;
-        if keyboard::is_pressed(glfw::Key::Space) {
-            unsafe {
-                world.get_scene("main")?.despawn(&format!("{}", COUNT))?;
-                COUNT += 1;
-            }
-        }
         Ok(())
     }
 
-    //#[test]
+    #[test]
     pub fn many_entity_test() -> RageResult {
         World::new()
             .on_start(many_entity_init)
@@ -103,13 +161,13 @@ mod tests {
         ////////////////////////////
         // Scene 0                //
         ////////////////////////////
-        let r_player_0: SpriteRenderer = SpriteRenderer::from(
+        let r_player_0: SpriteRenderer = SpriteRenderer::slice(
             vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture(0));
+            &spritesheet, 0, 0);
         let t_player_0: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
-        let r_side_0: SpriteRenderer = SpriteRenderer::from(
+        let r_side_0: SpriteRenderer = SpriteRenderer::slice(
             vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture(0));
+            &spritesheet, 0, 0);
         let t_side_0: Transform = Transform::from(vec3(100.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
 
         let scene = world.new_scene("main")?;
@@ -124,9 +182,9 @@ mod tests {
         ////////////////////////////
         // Scene 1                //
         ////////////////////////////
-        let r_player_1: SpriteRenderer = SpriteRenderer::from(
+        let r_player_1: SpriteRenderer = SpriteRenderer::slice(
             vec4(1.0, 1.0, 1.0, 1.0),
-            spritesheet.get_texture(2));
+            &spritesheet, 2, 2);
         let t_player_1: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
 
         let scene = world.new_scene("next")?;
@@ -164,20 +222,20 @@ mod tests {
     #[test]
     fn entity_test_attach_detach() -> RageResult {
         let mut entity: Entity = Entity::new("test".to_owned());
-        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE, Spritesheet::empty_tex());
+        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE);
         entity.attach(sprite_renderer)?;
         entity.detach::<SpriteRenderer>()?;
 
         let transform: Transform = Transform::zero();
 
-        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE, Spritesheet::empty_tex());
+        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE);
         entity.attach(sprite_renderer)?;
         entity.add(transform)?;
 
         entity.detach::<SpriteRenderer>()?;
         entity.remove::<Transform>()?;
 
-        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE, Spritesheet::empty_tex());
+        let sprite_renderer: SpriteRenderer = SpriteRenderer::from(Vec4::ONE);
         entity.attach(sprite_renderer)?;
         entity.add(transform)?;
 
