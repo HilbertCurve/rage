@@ -5,6 +5,7 @@ Renderer:
 - [x] Get window working
 - [x] First triangle
 - [x] Shader system
+- [ ] Custom shader loading
 - [x] Camera
 - [x] Abstract vertex buffer object
 - [x] First quad (as in primitive abstractions)
@@ -28,6 +29,8 @@ Core:
 - [x] Scenes - this should wait until ecs is working
 - [x] Blocks - data chunks, primarily for renderer
 - [x] World - delta time, configuration, WorldBuilder
+- [ ] Timers in world
+- [ ] Globals in world
 
 ECS: Entity Component System
 What if we had scenes create objects that are manipulated on the fly? Kinda like the factory pattern?
@@ -38,10 +41,10 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Dynamic components
 - [x] Scenes - collection of entities that can be updated en masse
 - [x] Basic sprite renderer
-- [-] Scene function pointer integration - moved to World
 - [x] Scene names
 - [x] Entity names
 - [ ] Refactor SpriteRenderer to `renderer` directory
+Scene function pointer integration - moved to World
 
 Resources: resource access, freeing, storing, etc.
 - [ ] Spritesheet - refactor here
@@ -49,8 +52,8 @@ Resources: resource access, freeing, storing, etc.
 - [ ] etc (as they come along)
 
 Audio:
-- [ ] Temporary rodio implementation
-- [ ] Sometime, shift to pure cpal implementation
+- [x] Temporary rodio implementation
+- [ ] Sometime, shift to pure cpal implementation (better portability)
 
 Physics: Main controller -> RigidBody factory. Collider is the component form of a RigidBody, and there's a 1-to-1 correspondence between created components and RigidBody's (to be managed by a custom drop() function).
 - [ ] Framework - set up the physics factory
@@ -59,7 +62,9 @@ Physics: Main controller -> RigidBody factory. Collider is the component form of
 - [ ] Rotational collision resolution - how does friction play into this?
 
 State Machines:
-- [ ] Plan
+- [ ] StateMachine trait
+- [ ] States
+- [ ] State Machine test
 
 Tests:
 - [ ] More block tests; edge cases
@@ -69,7 +74,7 @@ Misc:
 - [ ] Make README
 - [ ] Tons of documentation lmao
 - [ ] Proper re-exports: certain components really shouldn't be exposed, at least without using the `rage::ext` module; other components have no function outside of the engine (like globals) and shouldn't be exposed at all
-- [-] ChainError - wouldn't have much use, as many functions fail at library level, and most errors can be debugged without too much trouble
+ChainError - wouldn't have much use, as many functions fail at library level, and most errors can be debugged without too much trouble
 
 Known bugs:
 - [x] Fix gl::Viewport; currently items clip off of the screen easily - `window.set_size_polling(true)` needed

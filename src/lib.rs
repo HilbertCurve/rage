@@ -27,7 +27,7 @@ mod tests {
 
         let hearts: Spritesheet = Spritesheet::from("assets/textures/hearts.png".to_owned(), 16, 16, 0)?;
 
-        let entity = scene.spawn("main")?;
+        let entity = scene.spawn("0")?;
         entity.attach(SpriteRenderer::from(&hearts))?;
         entity.add(Transform::from(
             Vec3::ZERO,
@@ -36,23 +36,20 @@ mod tests {
         ))?;
 
         world.set_scene("main")?;
+        world.push_timer("main");
 
         Ok(())
     }
 
     fn hearts_update(world: &mut World) -> RageResult {
-        
-        static mut ELAPSED_TIME: f64 = 0.0;
-        unsafe {
-            ELAPSED_TIME += world.dt();
-            if ELAPSED_TIME >= 0.25 {
-                world
-                    .get_scene("main")?
-                    .get("main")?
-                    .get_mut::<SpriteRenderer>()?
-                    .next_wrap();
-                ELAPSED_TIME = 0.0;
-            }
+        // heart animation using a timer
+        if world.get_timer("main")? >= 0.2 {
+            world
+                .get_scene("main")?
+                .get("0")?
+                .get_mut::<SpriteRenderer>()?
+                .next_wrap();
+            world.reset_timer("main")?;
         }
 
         Ok(())
@@ -65,7 +62,6 @@ mod tests {
             .on_update(hearts_update)
             .set_config(Config::default())
             .run()
-
     }
     
     fn audio_test_start(world: &mut World) -> RageResult {

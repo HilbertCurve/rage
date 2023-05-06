@@ -8,11 +8,31 @@ use crate::core::{self, prelude::*};
 use crate::core::scene::{Scene, SceneError};
 use crate::renderer::renderer;
 
+use std::fmt::Display;
 use std::sync::mpsc::Receiver;
 use glam::*;
 
 pub type RageResult = Result<(), Box<dyn std::error::Error>>;
 type GlfwConf = (glfw::Glfw, glfw::Window, Receiver<(f64, glfw::WindowEvent)>);
+
+#[derive(Debug)]
+pub struct WorldError {
+    what: String,
+}
+
+impl std::error::Error for WorldError {  }
+
+impl Display for WorldError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "WorldError: {}", self.what)
+    }
+}
+
+impl From<String> for WorldError {
+    fn from(what: String) -> Self {
+        Self { what }
+    }
+}
 
 const TITLE: &str = "Rage Game Engine";
 pub struct WorldBuilder {
@@ -53,8 +73,29 @@ impl WorldBuilder {
             current_scene: String::new(),
             start: self.start_fn,
             update: self.update_fn,
+            timers: vec![],
         };
         built_world.run(self.config)
+    }
+}
+
+struct Timer {
+    name: String,
+    val: f64,
+}
+
+impl Timer {
+    pub fn new(name: String) -> Self {
+        Timer {
+            name,
+            val: 0.0,
+        }
+    }
+    pub fn set(&mut self, val: f64) {
+        self.val = val
+    }
+    pub fn inc(&mut self, val: f64) {
+        self.val += val
     }
 }
 
@@ -67,6 +108,7 @@ pub struct World {
     current_scene: String,
     start: fn(&mut World) -> RageResult,
     update: fn(&mut World) -> RageResult,
+    timers: Vec<Timer>,
     //...
 }
 
@@ -112,11 +154,50 @@ impl World {
             Ok(self.get_scene(&self.current_scene.clone()).expect("stinki!"))
         }
     }
+    #[inline]
     pub fn fps(&self) -> f64 {
         self.fps
     }
+    #[inline]
     pub fn dt(&self) -> f64 {
         self.dt
+    }
+    #[inline]
+    pub fn uptime(&self) -> f64 {
+        self.uptime
+    }
+
+    pub fn get_timer(&self, name: &str) -> Result<f64, WorldError> {
+        for t in &self.timers {
+            if t.name == name {
+                return Ok(t.val);
+            }
+        }
+
+        Err(WorldError::from(format!("Timer {} not found", name)))
+    }
+    
+    pub fn push_timer(&mut self, name: &str) {
+        self.timers.push(Timer::new(name.to_owned()));
+    }
+    pub fn set_timer(&mut self, name: &str, val: f64) -> Result<(), WorldError> {
+        self.get_timer_raw(name)?.set(val);
+        Ok(())
+    }
+    pub fn reset_timer(&mut self, name: &str) -> Result<(), WorldError> {
+        self.get_timer_raw(name)?.set(0.0);
+        Ok(())
+    }
+
+    // helper function to get timer without 
+    fn get_timer_raw(&mut self, name: &str) -> Result<&mut Timer, WorldError> {
+        for i in 0..self.timers.len() {
+            if self.timers[i].name == name {
+                return Ok(&mut self.timers[i]);
+            }
+        }
+
+        Err(WorldError::from(format!("Timer {} not found", name)))
     }
 
     /// Initializes and runs program, consuming inputted configuration object.
@@ -159,6 +240,9 @@ impl World {
             self.uptime += dt;
             self.dt = dt;
             self.fps = 1.0 / dt;
+            for f in &mut self.timers {
+                f.inc(dt);
+            }
         }
 
         Ok(())

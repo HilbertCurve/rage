@@ -1,15 +1,16 @@
-pub mod app;
+pub mod world;
 pub mod config;
 pub mod mouse;
 pub mod keyboard;
 pub mod scene;
+//pub mod state;
 pub mod window;
 
 pub mod prelude {
-    pub use crate::core::app::World;
+    pub use crate::core::world::World;
     pub use super::config::Config;
     pub use crate::core::scene::Scene;
-    pub use crate::core::app::RageResult;
+    pub use crate::core::world::RageResult;
 
     pub mod mouse {
         pub use crate::core::mouse::{
