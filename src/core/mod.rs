@@ -7,10 +7,10 @@ pub mod state;
 pub mod window;
 
 pub mod prelude {
-    pub use crate::core::world::World;
-    pub use super::config::Config;
+    pub use crate::core::config::Config;
     pub use crate::core::scene::Scene;
-    pub use crate::core::world::RageResult;
+    pub use crate::core::state::{State, StateError, StateMachine};
+    pub use crate::core::world::{World, RageResult};
 
     pub mod mouse {
         pub use crate::core::mouse::{

@@ -20,7 +20,7 @@ impl From<String> for StateError {
     }
 }
 
-pub type StateResult = Result<(), StateError>;
+pub type StateResult = crate::prelude::RageResult;
 
 #[derive(Component)]
 pub struct StateMachine {
@@ -55,51 +55,46 @@ impl StateMachine {
             }
         }
 
-        Err(StateError::from(format!("No state named {} found in StateMachine.", name)))
+        Err(Box::new(StateError::from(format!("No state named {} found in StateMachine.", name))))
+    }
+
+    pub fn current_state(&self) -> &State {
+        &self.states[self.state_index]
     }
 }
 
 impl DynComponent for StateMachine {
-    unsafe fn start(&mut self, parent: *mut Entity) -> Result<(), crate::ecs::component::ComponentError> {
-        if let Err(e) = (self.states[self.state_index].start)(&mut *parent) {
-            Err(e.into())
-        } else {
-            Ok(())
-        }
+    unsafe fn start(&mut self, _parent: *mut Entity) -> Result<(), crate::ecs::component::ComponentError> {
+        Ok(())
     }
 
     unsafe fn update(&mut self, dt: f64, parent: *mut Entity) -> Result<(), crate::ecs::component::ComponentError> {
         if let Err(e) = (self.states[self.state_index].update)(&mut *parent, dt) {
-            Err(e.into())
+            Err(ComponentError::BadUpdate(e.to_string()))
         } else {
             Ok(())
         }
     }
 
-    unsafe fn stop(&mut self, parent: *mut Entity) -> Result<(), crate::ecs::component::ComponentError> {
-        if let Err(e) = (self.states[self.state_index].stop)(&mut *parent) {
-            Err(e.into())
-        } else {
-            Ok(())
-        }
+    unsafe fn stop(&mut self, _parent: *mut Entity) -> Result<(), crate::ecs::component::ComponentError> {
+        Ok(())
     }
 }
 
 #[derive(Clone)]
 pub struct State {
     name: String,
-    start: fn(&mut Entity) -> StateResult,
-    update: fn(&mut Entity, dt: f64) -> StateResult,
-    stop: fn(&mut Entity) -> StateResult,
+    update: fn(&mut Entity, dt: f64) -> crate::prelude::RageResult,
 }
 
 impl State {
     pub fn from(
         name: String,
-        start: fn(&mut Entity) -> StateResult,
-        update: fn(&mut Entity, dt: f64) -> StateResult,
-        stop: fn(&mut Entity) -> StateResult,
+        update: fn(&mut Entity, dt: f64) -> crate::prelude::RageResult,
     ) -> State {
-        State { name, start, update, stop }
+        State { name, update }
+    }
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }

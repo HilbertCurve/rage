@@ -62,9 +62,9 @@ Physics: Main controller -> RigidBody factory. Collider is the component form of
 - [ ] Rotational collision resolution - how does friction play into this?
 
 State Machines:
-- [ ] StateMachine component
-- [ ] States
-- [ ] State Machine test
+- [x] StateMachine component
+- [x] States
+- [x] State Machine test
 
 Tests:
 - [ ] More block tests; edge cases

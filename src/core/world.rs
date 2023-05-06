@@ -223,15 +223,9 @@ impl World {
             (self.update)(&mut self)?;
             let wdt = self.dt.clone();
             self.current_scene()?.update::<SpriteRenderer>(wdt)?;
+            self.current_scene()?.update::<StateMachine>(wdt)?;
           //self.current_scene()?.update::<Collider>()?;
             renderer::update();
-
-            if keyboard::is_pressed(glfw::Key::A) {
-                println!("{:?}", mouse::pos());
-            }
-            if mouse::is_pressed(glfw::MouseButton::Button1) {
-                println!("Pressed");
-            }
 
             window.swap_buffers();
 
