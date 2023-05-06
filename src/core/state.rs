@@ -1,20 +1,11 @@
 use std::error::Error;
-use std::fmt::Display;
 
 use crate::ecs::entity::Entity; 
 use crate::ecs::component::{Component, DynComponent, ComponentError};
 
-#[derive(Debug)]
+#[derive(Error)]
 pub struct StateError {
     what: String
-}
-
-impl Error for StateError {  }
-
-impl Display for StateError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "StateError: {}", self.what)
-    }
 }
 
 impl Into<ComponentError> for StateError {
@@ -49,7 +40,8 @@ impl From<Vec<State>> for StateMachine {
 impl From<&[State]> for StateMachine {
     fn from(states: &[State]) -> Self {
         StateMachine {
-            
+            states: states.to_vec(),
+            state_index: 0,
         }
     }
 }
@@ -93,10 +85,21 @@ impl DynComponent for StateMachine {
     }
 }
 
+#[derive(Clone)]
 pub struct State {
     name: String,
     start: fn(&mut Entity) -> StateResult,
     update: fn(&mut Entity, dt: f64) -> StateResult,
     stop: fn(&mut Entity) -> StateResult,
-    
+}
+
+impl State {
+    pub fn from(
+        name: String,
+        start: fn(&mut Entity) -> StateResult,
+        update: fn(&mut Entity, dt: f64) -> StateResult,
+        stop: fn(&mut Entity) -> StateResult,
+    ) -> State {
+        State { name, start, update, stop }
+    }
 }

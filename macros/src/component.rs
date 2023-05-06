@@ -19,4 +19,3 @@ pub fn derive(input: TokenStream) -> TokenStream {
     };
     output.into()
 }
-

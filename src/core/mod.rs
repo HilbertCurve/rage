@@ -3,7 +3,7 @@ pub mod config;
 pub mod mouse;
 pub mod keyboard;
 pub mod scene;
-//pub mod state;
+pub mod state;
 pub mod window;
 
 pub mod prelude {

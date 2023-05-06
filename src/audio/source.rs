@@ -62,7 +62,7 @@ impl AudioSource {
         self.state = AudioSourceState::Playing(filepath.clone());
 
         // Load a sound from a file, using a path relative to Cargo.toml
-        let file = BufReader::new(File::open(filepath).unwrap());
+        let file = BufReader::new(File::open(filepath)?);
 
         // using the rodio handle, play the buffered file
         // TODO: pre-buffered files

@@ -2,7 +2,6 @@ use crate::ecs::component::{ComponentError, DynComponent};
 use crate::ecs::entity::Entity;
 
 use std::error::Error;
-use std::fmt::{Debug, Display};
 
 pub struct Scene {
     pub e_vec: Vec<Entity>,
@@ -10,7 +9,7 @@ pub struct Scene {
     name: String,
 }
 
-#[derive(Debug)]
+#[derive(Error)]
 pub struct SceneError {
     what: String,
 }
@@ -18,13 +17,6 @@ pub struct SceneError {
 impl SceneError {
     pub fn new(what: &str) -> SceneError {
         SceneError { what: String::from(what) }
-    }
-}
-impl Error for SceneError {}
-impl Display for SceneError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(fmt, "{}", self.what)?;
-        Ok(())
     }
 }
 

@@ -62,7 +62,7 @@ Physics: Main controller -> RigidBody factory. Collider is the component form of
 - [ ] Rotational collision resolution - how does friction play into this?
 
 State Machines:
-- [ ] StateMachine trait
+- [ ] StateMachine component
 - [ ] States
 - [ ] State Machine test
 
@@ -71,6 +71,7 @@ Tests:
 - [x] Scene change test
 
 Misc:
+- [x] Error macro
 - [ ] Make README
 - [ ] Tons of documentation lmao
 - [ ] Proper re-exports: certain components really shouldn't be exposed, at least without using the `rage::ext` module; other components have no function outside of the engine (like globals) and shouldn't be exposed at all
