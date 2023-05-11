@@ -12,8 +12,16 @@ use std::ptr;
 use std::sync::Mutex;
 
 // global variable, bc idk, probably best
-lazy_static! {
-    pub static ref TEX_POOL: Mutex<Vec<Spritesheet>> = Mutex::new(vec![]);
+pub static TEX_POOL: Mutex<Vec<Spritesheet>> = Mutex::new(vec![]);
+
+pub fn gl_err_check(line: u32) {
+    let err = unsafe { gl::GetError() };
+    if err != 0 {
+        panic!("error here at line: {}! {}", line, err.to_string())
+    }
+}
+pub fn gl_err_clear() {
+    while unsafe { gl::GetError() } != 0 {}
 }
 
 #[derive(Debug)]
@@ -68,25 +76,52 @@ pub fn start() {
 pub fn update() {
     // TODO: static vec of data buffers, render each according to their primitive
     unsafe {
+        gl_err_clear();
         gl::Clear(gl::COLOR_BUFFER_BIT);
+        gl_err_check(line!());
 
         DEFAULT_VB.bind();
+        gl_err_check(line!());
         DEFAULT_VB.refresh();
+        gl_err_check(line!());
 
         // attach textures
-        for tex in &*TEX_POOL.try_lock().unwrap() {
+        for tex in TEX_POOL.try_lock().unwrap().iter() {
             gl::ActiveTexture(gl::TEXTURE0 + tex.get_id());
             gl::BindTexture(gl::TEXTURE_2D, tex.get_id());
         }
 
         // shader stuff
         DEFAULT_SHADER.attach();
+        gl_err_check(line!());
         DEFAULT_SHADER.set_uniform_mat4("uProjection", Camera::get().projection_mat());
+        gl_err_check(line!());
         DEFAULT_SHADER.set_uniform_mat4("uView", Camera::get().view_mat());
+        gl_err_check(line!());
+        // there must be a better way to do this
+        let mut ids;
+        {
+            let tpl = TEX_POOL.try_lock().unwrap();
+            ids = vec![0i32;tpl.len()];
+            let mut i = 0;
+            for id in ids.iter_mut() {
+                *id = tpl.get(i).unwrap().get_id() as i32;
+                i += 1;
+            }
+        }
+        // make sure to attach integer values to the uTextures as well!!!
+        DEFAULT_SHADER.set_uniform_i32_array(
+            "uTextures",
+            TEX_POOL.try_lock().unwrap().len() as i32,
+            ids.as_ptr(),
+        );
+        println!("{:?}", ids);
 
         // vertex attrib pointers
         DEFAULT_VB.enable_attribs();
+        gl_err_check(line!());
 
+        // draw
         let quad = &primitive::QUAD;
         gl::DrawElements(
             quad.gl_prim,
@@ -94,15 +129,20 @@ pub fn update() {
             gl::UNSIGNED_INT,
             ptr::null()
             );
+        gl_err_check(line!());
 
         DEFAULT_VB.disable_attribs();
+        gl_err_check(line!());
 
         DEFAULT_VB.unbind();
+        gl_err_check(line!());
         DEFAULT_VB.clear();
+        gl_err_check(line!());
         DEFAULT_SHADER.detach();
+        gl_err_check(line!());
 
         // detach textures
-        for tex in &*TEX_POOL.try_lock().unwrap() {
+        for tex in TEX_POOL.try_lock().unwrap().iter() {
             gl::ActiveTexture(gl::TEXTURE0 + tex.get_id());
             gl::BindTexture(gl::TEXTURE_2D, 0);
         }

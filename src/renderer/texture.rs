@@ -32,9 +32,10 @@ pub struct Spritesheet {
 // returns copy of created sprite sheet (bc they aren't really mutable anyways)
 impl Spritesheet {
     pub fn from(src: String, s_width: u32, s_height: u32, padding: u32) -> Result<Spritesheet, Box<dyn error::Error>> {
-        let mut id: u32 = 0;
+        let mut id = 0;
         unsafe {
             gl::GenTextures(1, &mut id);
+            gl::ActiveTexture(gl::TEXTURE0 + id);
             gl::BindTexture(gl::TEXTURE_2D, id);
 
             // Repeat image in both directions
@@ -66,8 +67,8 @@ impl Spritesheet {
             }
 
             TEX_POOL.try_lock()?.push(Spritesheet { id, src: src.clone(), width, height, s_width, s_height, padding });
+            gl::BindTexture(gl::TEXTURE_2D, 0);
         }
-
         Ok(Spritesheet { id, src: src.clone(), width, height, s_width, s_height, padding })
     }
 

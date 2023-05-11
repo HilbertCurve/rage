@@ -157,5 +157,18 @@ impl Shader {
             gl::Uniform1f(var_loc, val);
         }
     }
+
+    pub fn set_uniform_i32_array(&mut self, name: &str, count: i32, arr: *const i32) {
+        let var_loc = unsafe {
+            let c_str = CString::new(name).expect("");
+            gl::GetUniformLocation(self.p_id, c_str.as_ptr())
+        };
+        if !self.is_used {
+            self.attach();
+        }
+        unsafe {
+            gl::Uniform1iv(var_loc, count, arr);
+        }
+    }
 }
 

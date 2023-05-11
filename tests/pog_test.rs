@@ -1,56 +1,55 @@
 use rage::prelude::*;
 
+// Outline:
+// Scene 0 is the title screen. There will be a button that advances the user to
+// the game scene.
+// Scene 1 is the game scree. There will be two paddles and a ball going back and
+// forth on the screen.
+// When the game ends (first to five or smth), scene switches to title.
+
+#[derive(Component)]
+struct Score(usize);
+
 fn s_init(world: &mut World) -> RageResult {
-    let spritesheet: Spritesheet = Spritesheet::from(String::from("./assets/textures/test.png"), 8, 8, 0)?;
+    let button_sheet = Spritesheet::from("assets/pog/pog_button.png".to_owned(), 20, 6, 0)?;
+    
+    let text_sheet = Spritesheet::from("assets/pog/pog_title.png".to_owned(), 20, 12, 0)?;
+    
+    // Scene 0
+    let scene_0 = world.new_scene("scene_0")?;
 
-    ////////////////////////////
-    // Scene 0                //
-    ////////////////////////////
-    let r_player_0: SpriteRenderer = SpriteRenderer::slice(
-        vec4(1.0, 1.0, 1.0, 1.0),
-        &spritesheet, 0, 0);
-    let t_player_0: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
-    let r_side_0: SpriteRenderer = SpriteRenderer::slice(
-        vec4(1.0, 1.0, 1.0, 1.0),
-        &spritesheet, 0, 0);
-    let t_side_0: Transform = Transform::from(vec3(100.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
+    let text = scene_0.spawn("title")?;
 
-    let scene = world.new_scene("main")?;
+    text.attach(SpriteRenderer::select(Vec4::ONE, &text_sheet, 0))?;
 
-    let e_ref_0 = scene.spawn("center")?;
-    e_ref_0.attach(r_player_0)?;
-    e_ref_0.add(t_player_0)?;
-    let e_side_0 = scene.spawn("right")?;
-    e_side_0.attach(r_side_0)?;
-    e_side_0.add(t_side_0)?;
+    text.add(Transform::from(
+        vec3(0.0, 40.0, 0.0),
+        vec3(20.0*10.0, 12.0*10.0, 1.0),
+        Vec3::ZERO
+    ))?;
 
-    ////////////////////////////
-    // Scene 1                //
-    ////////////////////////////
-    let r_player_1: SpriteRenderer = SpriteRenderer::slice(
-        vec4(1.0, 1.0, 1.0, 1.0),
-        &spritesheet, 2, 2);
-    let t_player_1: Transform = Transform::from(vec3(0.0, 0.0, 0.0), vec3(100.0, 100.0, 1.0), Vec3::ZERO);
+    let button = scene_0.spawn("button")?;
 
-    let scene = world.new_scene("next")?;
+    button.attach(SpriteRenderer::select(Vec4::ONE, &button_sheet, 0))?;
 
-    let e_ref_1 = scene.spawn("center")?;
-    e_ref_1.attach(r_player_1)?;
-    e_ref_1.add(t_player_1)?;
+    button.add(Transform::from(
+        vec3(0.0, -40.0, 0.0),
+        vec3(20.0*10.0, 6.0*10.0, 1.0),
+        Vec3::ZERO
+    ))?;
+    // Scene 1
+
+    world.set_scene("scene_0")?;
 
     Ok(())
 }
-#[allow(dead_code)]
-fn s_update(world: &mut World) -> RageResult {
-    world.set_scene("main")?;
-    if keyboard::is_pressed(glfw::Key::Space) {
-        world.set_scene("next")?;
-    }
+
+fn s_update(_world: &mut World) -> RageResult {
+    
     Ok(())
 }
 
-//#[test]
-#[allow(dead_code)]
+#[test]
 pub fn pog() -> RageResult {
     // Setup
     let config: Config = Config::default();
