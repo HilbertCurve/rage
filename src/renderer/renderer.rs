@@ -115,7 +115,6 @@ pub fn update() {
             TEX_POOL.try_lock().unwrap().len() as i32,
             ids.as_ptr(),
         );
-        println!("{:?}", ids);
 
         // vertex attrib pointers
         DEFAULT_VB.enable_attribs();

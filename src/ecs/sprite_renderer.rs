@@ -90,6 +90,10 @@ impl SpriteRenderer {
     pub fn last_frame(&mut self) {
         self.cur_tex = self.textures.len() - 1;
     }
+    #[inline]
+    pub fn curr_frame(&self) -> usize {
+        self.cur_tex
+    }
 }
 
 unsafe impl Send for SpriteRenderer {}

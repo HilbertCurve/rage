@@ -31,6 +31,17 @@ pub struct Spritesheet {
 
 // returns copy of created sprite sheet (bc they aren't really mutable anyways)
 impl Spritesheet {
+    pub const fn empty() -> Spritesheet {
+        Spritesheet {
+            id: 0,
+            src: String::new(),
+            width: 0,
+            height: 0,
+            s_width: 0,
+            s_height: 0,
+            padding: 0,
+        }
+    }
     pub fn from(src: String, s_width: u32, s_height: u32, padding: u32) -> Result<Spritesheet, Box<dyn error::Error>> {
         let mut id = 0;
         unsafe {

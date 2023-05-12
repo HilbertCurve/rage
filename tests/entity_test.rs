@@ -1,12 +1,18 @@
-use rage::prelude::*;
+use std::sync::Mutex;
+
+use rage::{prelude::*, utils::mouse_pos};
+
+static mut HEARTS: Mutex<Spritesheet> = Mutex::new(Spritesheet::empty());
 
 fn hearts_start(world: &mut World) -> RageResult {
+    unsafe { HEARTS = Mutex::new(Spritesheet::from("assets/textures/hearts.png".to_owned(), 16, 16, 0)?); }
+
+    let h_ref = unsafe { HEARTS.get_mut()? };
+
     let scene = world.new_scene("main")?;
 
-    let hearts: Spritesheet = Spritesheet::from("assets/textures/hearts.png".to_owned(), 16, 16, 0)?;
-
     let entity = scene.spawn("0")?;
-    entity.attach(SpriteRenderer::from(&hearts))?;
+    entity.attach(SpriteRenderer::slice(Vec4::ONE, h_ref, 0, 4))?;
     entity.add(Transform::from(
         Vec3::ZERO,
         Vec3::from((250.0, 250.0, 50.0)),
@@ -15,20 +21,39 @@ fn hearts_start(world: &mut World) -> RageResult {
 
     world.set_scene("main")?;
     world.push_timer("main");
+    world.push_timer("names");
 
     Ok(())
 }
 
 fn hearts_update(world: &mut World) -> RageResult {
+
+    let h_ref = unsafe { HEARTS.get_mut()? };
+
     // heart animation using a timer
-    if world.get_timer("main")? >= 0.2 {
+    if world.get_timer("main")? >= 0.2 && mouse::is_pressed(glfw::MouseButton::Button1) {
         world
             .get_scene("main")?
             .get("0")?
             .get_mut::<SpriteRenderer>()?
             .next_wrap();
+
+        // spawn new entity
+        let frame = world.get_scene("main")?.get("0")?.get::<SpriteRenderer>()?.curr_frame();
+        let timer = world.get_timer("names")?.clone();
+        let new_entity = world.get_scene("main")?.spawn(&format!("{}", timer))?;
+        new_entity.attach(SpriteRenderer::select(Vec4::ONE, h_ref, frame))?;
+        new_entity.add(Transform::from(
+            Vec3::from((mouse_pos::mouse_pos(), 0.0)),
+            Vec3::from((250.0, 250.0, 50.0)),
+            Vec3::ZERO,
+        ))?;
+
         world.reset_timer("main")?;
     }
+    world.get_scene("main")?.get("0")?.get_mut::<Transform>()?.pos = Vec3::from((mouse_pos::mouse_pos(), 0.0));
+
+
 
     Ok(())
 }
