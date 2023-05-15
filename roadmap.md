@@ -1,5 +1,10 @@
 rage game engine progress:
 thank goodness rust has an automatic build system - I'm no good at cpp :P
+note: for some linux distros, run these commands BEFORE building:
+```
+sudo apt-get install libasound2-dev
+export MESA_GL_VERSION_OVERRIDE=3.3
+```
 
 Renderer:
 - [x] Get window working
