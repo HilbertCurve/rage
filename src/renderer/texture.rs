@@ -1,5 +1,6 @@
 use image::DynamicImage;
 
+use crate::core::assets::Asset;
 use crate::renderer::renderer::TEX_POOL;
 use crate::utils::block::Block;
 use crate::utils::error::UnsupportedError;
@@ -27,6 +28,29 @@ pub struct Spritesheet {
     s_height: u32,
     /// Width/height between each sprite in this spritesheet
     padding: u32,
+}
+
+impl Asset for Spritesheet {
+    fn new() -> Self where Self: Sized {
+        Spritesheet::empty()
+    }
+    fn clear(&mut self) -> crate::prelude::RageResult {
+        // remove from TEX_POOL
+        // TODO: TEX_POOL is a horrible idea now that we have assets
+        unsafe {
+            let mut t_ref = TEX_POOL.try_lock()?;
+            for i in 0..t_ref.len() {
+                if self.id == t_ref.get_unchecked(i).id {
+                    t_ref.remove(i);
+                    return Ok(())
+                }
+            }
+        }
+        unreachable!()
+    }
+    fn type_str() -> &'static str where Self: Sized {
+        "Spritesheet"
+    }
 }
 
 // returns copy of created sprite sheet (bc they aren't really mutable anyways)

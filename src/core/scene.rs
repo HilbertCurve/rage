@@ -92,7 +92,16 @@ impl Scene {
                          name,
                          self.name)))
     }
-    pub fn get(&mut self, name: &str) -> Result<&mut Entity, SceneError> {
+    pub fn get(&self, name: &str) -> Result<&Entity, SceneError> {
+        for i in 0..self.e_vec.len() {
+            if &self.e_vec[i].name() == name {
+                return Ok(&self.e_vec[i]);
+            }
+        }
+
+        Err(SceneError::new(&format!("Entity of name: {} not found in Scene of name: {}", name, self.name)))
+    }
+    pub fn get_mut(&mut self, name: &str) -> Result<&mut Entity, SceneError> {
         for i in 0..self.e_vec.len() {
             if &self.e_vec[i].name() == name {
                 return Ok(&mut self.e_vec[i]);

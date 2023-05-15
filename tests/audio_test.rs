@@ -14,7 +14,7 @@ fn audio_test_start(world: &mut World) -> RageResult {
 }
 
 fn audio_test_update(world: &mut World) -> RageResult {
-    let entity = world.get_scene("main")?.get("source")?;
+    let entity = world.get_scene_mut("main")?.get_mut("source")?;
     if keyboard::is_pressed(glfw::Key::Space) {
         entity.get_mut::<AudioSource>()?.pause()?;
     } else {

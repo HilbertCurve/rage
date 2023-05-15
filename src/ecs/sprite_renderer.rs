@@ -223,4 +223,3 @@ impl Renderable for SpriteRenderer {
         Ok(())
     }
 }
-

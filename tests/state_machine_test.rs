@@ -1,7 +1,7 @@
 use lazy_static::lazy_static;
 use rage::prelude::*;
 
-lazy_static! {pub static ref STATES: [State; 2] = [
+lazy_static! { pub static ref STATES: [State; 2] = [
     State::from("start".to_string(), 
         |entity, _dt| {
             entity.get_mut::<SpriteRenderer>()?.color = vec4(1.0, 1.0, 1.0, 1.0);
@@ -35,6 +35,7 @@ fn state_machine_start(world: &mut World) -> RageResult {
     world.set_scene("main")?;
     Ok(())
 }
+
 fn state_machine_update(_world: &mut World) -> RageResult {
     Ok(())
 }

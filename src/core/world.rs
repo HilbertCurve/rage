@@ -12,6 +12,8 @@ use std::fmt::Display;
 use std::sync::mpsc::Receiver;
 use glam::*;
 
+use super::assets::{AssetManager, Asset, AssetError};
+
 pub type RageResult = Result<(), Box<dyn std::error::Error>>;
 type GlfwConf = (glfw::Glfw, glfw::Window, Receiver<(f64, glfw::WindowEvent)>);
 
@@ -34,7 +36,6 @@ impl From<String> for WorldError {
     }
 }
 
-const TITLE: &str = "Rage Game Engine";
 pub struct WorldBuilder {
     start_fn: fn(&mut World) -> RageResult,
     update_fn: fn(&mut World) -> RageResult,
@@ -74,6 +75,7 @@ impl WorldBuilder {
             start: self.start_fn,
             update: self.update_fn,
             timers: vec![],
+            assets: AssetManager::new(),
         };
         built_world.run(self.config)
     }
@@ -101,6 +103,7 @@ impl Timer {
 
 pub struct World {
     // SceneManager?
+    // TODO: asset manager
     scenes: Vec<Scene>,
     uptime: f64,
     dt: f64,
@@ -109,6 +112,7 @@ pub struct World {
     start: fn(&mut World) -> RageResult,
     update: fn(&mut World) -> RageResult,
     timers: Vec<Timer>,
+    assets: AssetManager,
     //...
 }
 
@@ -130,7 +134,16 @@ impl World {
         Ok(self.scenes.last_mut().expect("stinki2"))
     }
 
-    pub fn get_scene(&mut self, name: &str) -> Result<&mut Scene, SceneError> {
+    pub fn get_scene(&self, name: &str) -> Result<&Scene, SceneError> {
+        for i in 0..self.scenes.len() {
+            if self.scenes[i].name() == name {
+                return Ok(&self.scenes[i]);
+            }
+        }
+        Err(SceneError::new(&format!("Scene of name: {} not found in World.", name)))
+    }
+
+    pub fn get_scene_mut(&mut self, name: &str) -> Result<&mut Scene, SceneError> {
         for i in 0..self.scenes.len() {
             if self.scenes[i].name() == name {
                 return Ok(&mut self.scenes[i]);
@@ -138,6 +151,7 @@ impl World {
         }
         Err(SceneError::new(&format!("Scene of name: {} not found in World.", name)))
     }
+
     pub fn set_scene(&mut self, name: &str) -> Result<(), SceneError> {
         for i in 0..self.scenes.len() {
             if self.scenes[i].name() == name {
@@ -151,7 +165,7 @@ impl World {
         if self.current_scene == "" {
             Err(SceneError::new("No default scene set!"))
         } else {
-            Ok(self.get_scene(&self.current_scene.clone()).expect("stinki!"))
+            Ok(self.get_scene_mut(&self.current_scene.clone()).expect("stinki!"))
         }
     }
     #[inline]
@@ -200,6 +214,30 @@ impl World {
         Err(WorldError::from(format!("Timer {} not found", name)))
     }
 
+    pub fn add_asset<T: Asset + Clone + 'static>(&mut self, key: String, asset: T) -> RageResult {
+        self.assets.insert(key, asset);
+
+        Ok(())
+    }
+
+    pub fn get_asset<T: Asset + Clone + 'static>(&mut self, key: String) -> Result<&T, AssetError> {
+        match self.assets.get(key.clone())?.downcast_ref() {
+            Some(v) => Ok(v),
+            None => Err(AssetError { what: format!("Asset error of key: {} not of type {}", key, T::type_str()) })
+        }
+    }
+
+    pub fn get_asset_mut<T: Asset + Clone + 'static>(&mut self, key: String) -> Result<&T, AssetError> {
+        match self.assets.get_mut(key.clone())?.downcast_mut() {
+            Some(v) => Ok(v),
+            None => Err(AssetError { what: format!("Asset error of key: {} not of type {}", key, T::type_str()) })
+        }
+    }
+
+    pub fn remove_asset(&mut self, key: String) -> RageResult {
+        Ok(self.assets.remove(key)?)
+    }
+
     /// Initializes and runs program, consuming inputted configuration object.
     pub fn run(mut self, config: Config) -> RageResult {
         // set config
@@ -207,7 +245,7 @@ impl World {
 
         // game loop, as specified by current scene
         // TODO: move to window.rs
-        let (mut glfw, mut window, events) = World::window_init()?;
+        let (mut glfw, mut window, events) = self.window_init()?;
         (self.start)(&mut self)?;
 
         let mut t0: f64;
@@ -242,7 +280,7 @@ impl World {
         Ok(())
     }
 
-    fn window_init() -> Result<GlfwConf, String> {
+    fn window_init(&mut self) -> Result<GlfwConf, String> {
         // starting window
 
         let mut inst = glfw::init(glfw::FAIL_ON_ERRORS)
@@ -268,7 +306,7 @@ impl World {
 
         unsafe {
             core::window::set_width_height(conf.window_width, conf.window_height);
-            core::window::set_title(String::from(TITLE));
+            core::window::set_title(String::from(Config::get().window_title.clone()));
         }
 
         // gl
@@ -296,7 +334,6 @@ impl World {
             }
             glfw::WindowEvent::Size(x, y) => {
                 core::window::width_height_event(x as u32, y as u32);
-                println!("({},{})", x, y);
                 unsafe {
                     gl::Viewport(0, 0, x, y);
                 }
@@ -305,4 +342,3 @@ impl World {
         }
     }
 }
-

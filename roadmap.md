@@ -6,6 +6,7 @@ Renderer:
 - [x] First triangle
 - [x] Shader system
 - [ ] Custom shader loading
+- [ ] Turn shaders into `Asset`s
 - [x] Camera
 - [x] Abstract vertex buffer object
 - [x] First quad (as in primitive abstractions)
@@ -26,11 +27,11 @@ Core:
 - [x] Window config
 - [ ] Renderer config - WIP
 - [x] Misc. config through config.rs
-- [x] Scenes - this should wait until ecs is working
-- [x] Blocks - data chunks, primarily for renderer
-- [x] World - delta time, configuration, WorldBuilder
-- [ ] Timers in world
-- [ ] Globals in world
+- [x] `Scene` - this should wait until ecs is working
+- [x] `Block` - data chunks, primarily for renderer
+- [x] `World` - delta time, configuration, `WorldBuilder`
+- [x] `Timer` in world
+- [ ] `Asset` in world
 
 ECS: Entity Component System
 What if we had scenes create objects that are manipulated on the fly? Kinda like the factory pattern?
@@ -43,7 +44,7 @@ What if we had scenes create objects that are manipulated on the fly? Kinda like
 - [x] Basic sprite renderer
 - [x] Scene names
 - [x] Entity names
-- [ ] Refactor SpriteRenderer to `renderer` directory
+- [ ] Refactor `SpriteRenderer` to `renderer` directory
 Scene function pointer integration - moved to World
 
 Resources: resource access, freeing, storing, etc.

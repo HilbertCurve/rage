@@ -15,7 +15,7 @@ fn hearts_start(world: &mut World) -> RageResult {
     entity.attach(SpriteRenderer::slice(Vec4::ONE, h_ref, 0, 4))?;
     entity.add(Transform::from(
         Vec3::ZERO,
-        Vec3::from((250.0, 250.0, 50.0)),
+        Vec3::from((125.0, 125.0, 50.0)),
         Vec3::from((0.0, 0.0, 0.0)),
     ))?;
 
@@ -31,29 +31,27 @@ fn hearts_update(world: &mut World) -> RageResult {
     let h_ref = unsafe { HEARTS.get_mut()? };
 
     // heart animation using a timer
-    if world.get_timer("main")? >= 0.2 && mouse::is_pressed(glfw::MouseButton::Button1) {
+    if world.get_timer("main")? >= 0.02 && mouse::is_pressed(glfw::MouseButton::Button1) {
         world
-            .get_scene("main")?
-            .get("0")?
+            .get_scene_mut("main")?
+            .get_mut("0")?
             .get_mut::<SpriteRenderer>()?
             .next_wrap();
 
         // spawn new entity
         let frame = world.get_scene("main")?.get("0")?.get::<SpriteRenderer>()?.curr_frame();
         let timer = world.get_timer("names")?.clone();
-        let new_entity = world.get_scene("main")?.spawn(&format!("{}", timer))?;
+        let new_entity = world.get_scene_mut("main")?.spawn(&format!("{}", timer))?;
         new_entity.attach(SpriteRenderer::select(Vec4::ONE, h_ref, frame))?;
         new_entity.add(Transform::from(
             Vec3::from((mouse_pos::mouse_pos(), 0.0)),
-            Vec3::from((250.0, 250.0, 50.0)),
+            Vec3::from((125.0, 125.0, 50.0)),
             Vec3::ZERO,
         ))?;
 
         world.reset_timer("main")?;
     }
-    world.get_scene("main")?.get("0")?.get_mut::<Transform>()?.pos = Vec3::from((mouse_pos::mouse_pos(), 0.0));
-
-
+    world.get_scene_mut("main")?.get_mut("0")?.get_mut::<Transform>()?.pos = Vec3::from((mouse_pos::mouse_pos(), 0.0));
 
     Ok(())
 }

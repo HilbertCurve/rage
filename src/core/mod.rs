@@ -1,3 +1,4 @@
+pub mod assets;
 pub mod world;
 pub mod config;
 pub mod mouse;
