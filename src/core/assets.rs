@@ -5,7 +5,7 @@ use crate::prelude::RageResult;
 
 #[derive(Error)]
 pub struct AssetError {
-    what: String
+    pub what: String
 }
 
 pub trait Asset: 'static {
@@ -38,14 +38,14 @@ impl AssetManager {
 
     pub fn get(&self, key: String) -> Result<&dyn std::any::Any, AssetError> {
         match self.assets.get(&key) {
-            Some(v) => Ok(v.as_any()),
+            Some(v) => Ok(v as &dyn std::any::Any),
             None => Err(AssetError { what: format!("Asset of key: {} not found", key) })
         }
     }
 
     pub fn get_mut(&mut self, key: String) -> Result<&mut dyn std::any::Any, AssetError> {
         match self.assets.get_mut(&key) {
-            Some(v) => Ok(v.as_any_mut()),
+            Some(v) => Ok(v as &mut dyn std::any::Any),
             None => Err(AssetError { what: format!("Asset of key: {} not found", key) })
         }
     }

@@ -286,6 +286,7 @@ impl World {
         let mut inst = glfw::init(glfw::FAIL_ON_ERRORS)
             .or(Err("Could not initialize GLFW instance.".to_owned()))?;
 
+        inst.window_hint(glfw::WindowHint::ContextVersion(3, 3));
         let conf = Config::get();
 
         let (mut window, events) = inst.create_window(
