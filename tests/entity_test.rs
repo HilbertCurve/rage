@@ -5,14 +5,12 @@ use rage::{prelude::*, utils::mouse_pos};
 static mut HEARTS: Mutex<Spritesheet> = Mutex::new(Spritesheet::empty());
 
 fn hearts_start(world: &mut World) -> RageResult {
-    unsafe { HEARTS = Mutex::new(Spritesheet::from("assets/textures/hearts.png".to_owned(), 16, 16, 0)?); }
-
-    let h_ref = unsafe { HEARTS.get_mut()? };
+    world.add_asset("hearts".to_string(), Spritesheet::from("assets/textures/hearts.png".to_owned(), 16, 16, 0)?)?;
 
     let scene = world.new_scene("main")?;
 
     let entity = scene.spawn("0")?;
-    entity.attach(SpriteRenderer::slice(Vec4::ONE, h_ref, 0, 4))?;
+    //entity.attach(SpriteRenderer::slice(Vec4::ONE, world.get_asset("hearts".to_string())?, 0, 4))?;
     entity.add(Transform::from(
         Vec3::ZERO,
         Vec3::from((125.0, 125.0, 50.0)),
@@ -51,7 +49,7 @@ fn hearts_update(world: &mut World) -> RageResult {
 
         world.reset_timer("main")?;
     }
-    world.get_scene_mut("main")?.get_mut("0")?.get_mut::<Transform>()?.pos = Vec3::from((mouse_pos::mouse_pos(), 0.0));
+    world.get_scene_mut("main")?["0"].get_mut::<Transform>()?.pos = Vec3::from((mouse_pos::mouse_pos(), 0.0));
 
     Ok(())
 }

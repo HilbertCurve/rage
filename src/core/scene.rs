@@ -2,6 +2,7 @@ use crate::ecs::component::{ComponentError, DynComponent};
 use crate::ecs::entity::Entity;
 
 use std::error::Error;
+use std::ops::{Index, IndexMut};
 
 pub struct Scene {
     pub e_vec: Vec<Entity>,
@@ -126,3 +127,16 @@ impl Scene {
     }
 }
 
+impl Index<&str> for Scene {
+    type Output = Entity;
+    fn index(&self, index: &str) -> &Self::Output {
+        self.get(index).expect(&format!("Entity: {} not found in scene: {}", index, self.name))
+    }
+}
+
+impl IndexMut<&str> for Scene {
+    fn index_mut(&mut self, index: &str) -> &mut Self::Output {
+        let name =  self.name.clone();
+        self.get_mut(index).expect(&format!("Entity: {} not found in scene: {}", index, name))
+    }
+}

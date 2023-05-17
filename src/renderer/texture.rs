@@ -13,6 +13,7 @@ pub struct Texture {
     pub uvs: [f32; 8],
 }
 
+#[derive(Clone)]
 pub struct Spritesheet {
     /// ID number used with OpenGL
     id: u32,

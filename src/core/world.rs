@@ -220,7 +220,7 @@ impl World {
         Ok(())
     }
 
-    pub fn get_asset<T: Asset + Clone + 'static>(&mut self, key: String) -> Result<&T, AssetError> {
+    pub fn get_asset<T: Asset + Clone + 'static>(&self, key: String) -> Result<&T, AssetError> {
         match self.assets.get(key.clone())?.downcast_ref() {
             Some(v) => Ok(v),
             None => Err(AssetError { what: format!("Asset error of key: {} not of type {}", key, T::type_str()) })
