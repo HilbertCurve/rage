@@ -67,7 +67,7 @@ impl Spritesheet {
             padding: 0,
         }
     }
-    pub fn from(src: String, s_width: u32, s_height: u32, padding: u32) -> Result<Spritesheet, Box<dyn error::Error>> {
+    pub fn from(src: &str, s_width: u32, s_height: u32, padding: u32) -> Result<Spritesheet, Box<dyn error::Error>> {
         let mut id = 0;
         unsafe {
             gl::GenTextures(1, &mut id);
@@ -102,10 +102,10 @@ impl Spritesheet {
                     UnsupportedError { what: format!("Unsupported number of channels: {}", channels) }))
             }
 
-            TEX_POOL.try_lock()?.push(Spritesheet { id, src: src.clone(), width, height, s_width, s_height, padding });
+            TEX_POOL.try_lock()?.push(Spritesheet { id, src: src.to_string(), width, height, s_width, s_height, padding });
             gl::BindTexture(gl::TEXTURE_2D, 0);
         }
-        Ok(Spritesheet { id, src: src.clone(), width, height, s_width, s_height, padding })
+        Ok(Spritesheet { id, src: src.to_string(), width, height, s_width, s_height, padding })
     }
 
     /// Padding as such: <br>

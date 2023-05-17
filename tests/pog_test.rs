@@ -30,9 +30,9 @@ pub fn t_is_overlap(t0: Transform, t1: Transform) -> bool {
 }
 
 fn start(world: &mut World) -> RageResult {
-    let button_sheet = Spritesheet::from("assets/pog/pog_button.png".to_owned(), 20, 6, 0)?;
+    let button_sheet = Spritesheet::from("assets/pog/pog_button.png", 20, 6, 0)?;
     
-    let text_sheet = Spritesheet::from("assets/pog/pog_title.png".to_owned(), 20, 12, 0)?;
+    let text_sheet = Spritesheet::from("assets/pog/pog_title.png", 20, 12, 0)?;
     
     // Scene 0
     let scene_0 = world.new_scene("scene_0")?;

@@ -25,7 +25,7 @@ impl SpriteRenderer {
     /// Warning: if start and end are equal, no textures will be selected.
     /// In addition, if start or end is out of bounds of the Spritesheet's
     /// textures, this will crash.
-    /// TODO: bounds check error.
+    /// TODO: bounds check error when `start == end`.
     pub fn slice(color: Vec4, sheet: &Spritesheet, start: usize, end: usize) -> SpriteRenderer {
         SpriteRenderer {
             color,
@@ -34,10 +34,9 @@ impl SpriteRenderer {
             trans_cache: Transform::zero(),
         }
     }
-    /// Create a SpriteRenderer from frame `frame` in a Spritesheet.
+    /// Create a SpriteRenderer from `frame`th texture in a Spritesheet.
     /// 
-    /// Warning: this function does not check bounds. That must be done
-    /// by the user.
+    /// TODO: this function does not check bounds.
     pub fn select(color: Vec4, sheet: &Spritesheet, frame: usize) -> SpriteRenderer {
         SpriteRenderer {
             color,

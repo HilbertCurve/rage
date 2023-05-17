@@ -1,10 +1,18 @@
-rage game engine progress:
+#rage game engine progress:
 thank goodness rust has an automatic build system - I'm no good at cpp :P
 note: for some linux distros, run these commands BEFORE building:
 ```
 sudo apt-get install libasound2-dev
 export MESA_GL_VERSION_OVERRIDE=3.3
 ```
+
+##Major Goals:
+- [x] Basic Renderer
+- [x] Suitable audio engine
+- [ ] Functional World-Scene-Entity-Component system
+- [ ] 3D Renderer
+- [ ] rage UI????
+- [ ] Physics engine???
 
 Renderer:
 - [x] Get window working
@@ -37,6 +45,7 @@ Core:
 - [x] `World` - delta time, configuration, `WorldBuilder`
 - [x] `Timer` in world
 - [ ] `Asset` in world
+- [ ] Move `World.scenes` behind an `Rc<>`?
 
 ECS: Entity Component System
 What if we had scenes create objects that are manipulated on the fly? Kinda like the factory pattern?
@@ -75,6 +84,7 @@ State Machines:
 Tests:
 - [ ] More block tests; edge cases
 - [x] Scene change test
+- [ ] Entity spawn/despawn test
 
 Misc:
 - [x] Error macro
@@ -87,3 +97,5 @@ Known bugs:
 - [x] Fix gl::Viewport; currently items clip off of the screen easily - `window.set_size_polling(true)` needed
 - [x] Fix Spritesheet vertical texture wrapping - improper `.floor()`
 - [x] Fix DynComponent null parent problem - passing pointers as function arguments B)
+- [ ] Change `String` parameter types to `&str`
+- [ ] Rendering RGB-formatted pngs fails; image is greyscale, sheared, and distorted
