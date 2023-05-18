@@ -1,7 +1,44 @@
 use rage::prelude::*;
 
-static life_count: usize = 3;
-static kill_count: usize = 0;
+static mut LIVES: usize = 3;
+static mut KILLS: usize = 0;
+
+pub fn is_inside(t: Transform, v: Vec2) -> bool {
+    // check x:
+    t.pos.x - t.whd.x / 2.0 <= v.x && v.x <= t.pos.x + t.whd.x / 2.0 &&
+    // check y:
+    t.pos.y - t.whd.y / 2.0 <= v.y && v.y <= t.pos.y + t.whd.y / 2.0
+}
+
+#[derive(Component)]
+struct Button {
+    trans_cache: Transform,
+}
+
+impl Button {
+    pub fn new() -> Button {
+        Button {
+            trans_cache: Transform::zero(),
+        }
+    }
+    pub fn is_pressed(&self) -> bool {
+        is_inside(self.trans_cache, mouse_pos::mouse_pos()) && mouse::is_pressed(glfw::MouseButton::Button1)
+    }
+}
+
+impl DynComponent for Button {
+    unsafe fn start(&mut self, parent: *mut Entity) -> Result<(), ComponentError> {
+        Ok(())
+    }
+    unsafe fn update(&mut self, dt: f64, parent: *mut Entity) -> Result<(), ComponentError> {
+        self.trans_cache = (&*parent).get::<Transform>()?.clone();
+
+        Ok(())
+    }
+    unsafe fn stop(&mut self, parent: *mut Entity) -> Result<(), ComponentError> {
+        Ok(())
+    }
+}
 
 fn start(world: &mut World) -> RageResult {
     let ui: Spritesheet = Spritesheet::from("./assets/textures/ui.png", 256, 64, 0)?;
@@ -35,6 +72,7 @@ fn start(world: &mut World) -> RageResult {
         vec3(400.0, 100.0, 0.0),
         Vec3::ZERO,
     ))?;
+    play.attach(Button::new())?;
 
     let quit = s_start.spawn("quit")?;
     quit.attach(SpriteRenderer::select(Vec4::ONE, &ui, 3))?;
@@ -43,6 +81,7 @@ fn start(world: &mut World) -> RageResult {
         vec3(400.0, 100.0, 0.0),
         Vec3::ZERO,
     ))?;
+    quit.attach(Button::new())?;
 
     //////////////////
     // Status Scene //
@@ -73,6 +112,16 @@ fn start(world: &mut World) -> RageResult {
         Vec3::ZERO,
     ))?;
 
+    for i in 0..unsafe{LIVES} {
+        let e = s_status.spawn(&format!("life{}", i))?;
+        e.attach(SpriteRenderer::from(Vec4::ONE))?;
+        e.add(Transform::from(
+            vec3(-50.0 + 50.0 * i as f32, -150.0, 0.0),
+            vec3(50.0, 50.0, 0.0),
+            Vec3::ZERO,
+        ))?;
+    }
+
     ////////////////
     // Game Scene //
     ////////////////
@@ -86,12 +135,67 @@ fn start(world: &mut World) -> RageResult {
         Vec3::ZERO,
     ))?;
 
+    /////////////////
+    // Death Scene //
+    /////////////////
+    let s_death = world.new_scene("death")?;
+
+    let title0 = s_death.spawn("title0")?;
+    title0.attach(SpriteRenderer::select(Vec4::ONE, &ui, 8))?;
+    title0.add()?;
+
+    ///////////
+    // Misc. //
+    ///////////
     world.set_scene("start")?;
+
+    world.push_timer("timer")?;
+
+    Ok(())
+}
+
+fn start_update(world: &mut World) -> RageResult {
+    if world.get_scene("start")?.get("play")?.get::<Button>()?.is_pressed() {
+        world.set_scene("game")?;
+    }
+    Ok(())
+}
+
+fn status_update(world: &mut World) -> RageResult {
+    Ok(())
+}
+
+fn game_update(world: &mut World) -> RageResult {
+    Ok(())
+}
+
+fn death_update(world: &mut World) -> RageResult {
     Ok(())
 }
 
 fn update(world: &mut World) -> RageResult {
+    // update new DynComponent
+    // TODO: add plugins to `World`
+    let dt = world.dt().clone();
+    world.current_scene()?.update::<Button>(dt)?;
+
+    // update each scene, depending on the current scene
+    let name = world.current_scene()?.name();
+    if name == "start" {
+        start_update(world)
+    } else if name == "status" {
+        status_update(world)
+    } else if name == "game" {
+        game_update(world)
+    } else if name == "death" {
+        death_update(world)
+    } else {
+        Ok(())
+    }
+
+
     // debug
+    /*
     if keyboard::is_pressed(glfw::Key::Num1) {
         world.set_scene("start")?;
     }
@@ -104,7 +208,7 @@ fn update(world: &mut World) -> RageResult {
     if keyboard::is_pressed(glfw::Key::Num4) {
         world.set_scene("death")?;
     }
-    Ok(())
+    */
 }
 
 #[test]
