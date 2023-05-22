@@ -76,6 +76,7 @@ impl WorldBuilder {
             update: self.update_fn,
             timers: vec![],
             assets: AssetManager::new(),
+            stopping: false,
         };
         built_world.run(self.config)
     }
@@ -113,6 +114,7 @@ pub struct World {
     update: fn(&mut World) -> RageResult,
     timers: Vec<Timer>,
     assets: AssetManager,
+    stopping: bool,
     //...
 }
 
@@ -191,6 +193,7 @@ impl World {
         Err(WorldError::from(format!("Timer {} not found", name)))
     }
     
+    //TODO: name check
     pub fn push_timer(&mut self, name: &str) {
         self.timers.push(Timer::new(name.to_owned()));
     }
@@ -214,28 +217,26 @@ impl World {
         Err(WorldError::from(format!("Timer {} not found", name)))
     }
 
-    pub fn add_asset<T: Asset + Clone + 'static>(&mut self, key: String, asset: T) -> RageResult {
-        self.assets.insert(key, asset);
+    pub fn add_asset<T: Asset + Clone + 'static>(&mut self, key: &str, asset: T) -> RageResult {
+        self.assets.insert(key.to_string(), asset);
 
         Ok(())
     }
 
-    pub fn get_asset<T: Asset + Clone + 'static>(&self, key: String) -> Result<&T, AssetError> {
-        match self.assets.get(key.clone())?.downcast_ref() {
-            Some(v) => Ok(v),
-            None => Err(AssetError { what: format!("Asset error of key: {} not of type {}", key, T::type_str()) })
-        }
+    pub fn get_asset<T: Asset + Clone + 'static>(&self, key: &str) -> Result<&T, AssetError> {
+        self.assets.get::<T>(key.to_string())
     }
 
-    pub fn get_asset_mut<T: Asset + Clone + 'static>(&mut self, key: String) -> Result<&T, AssetError> {
-        match self.assets.get_mut(key.clone())?.downcast_mut() {
-            Some(v) => Ok(v),
-            None => Err(AssetError { what: format!("Asset error of key: {} not of type {}", key, T::type_str()) })
-        }
+    pub fn get_asset_mut<T: Asset + Clone + 'static>(&mut self, key: &str) -> Result<&mut T, AssetError> {
+        self.assets.get_mut::<T>(key.to_string())
     }
 
-    pub fn remove_asset(&mut self, key: String) -> RageResult {
-        Ok(self.assets.remove(key)?)
+    pub fn remove_asset(&mut self, key: &str) -> RageResult {
+        Ok(self.assets.remove(key.to_string())?)
+    }
+
+    pub fn stop(&mut self) {
+        self.stopping = true;
     }
 
     /// Initializes and runs program, consuming inputted configuration object.
@@ -266,6 +267,10 @@ impl World {
             renderer::update();
 
             window.swap_buffers();
+
+            if self.stopping {
+                window.set_should_close(true);
+            }
 
             t1 = glfw.get_time();
             let dt = t1 - t0;

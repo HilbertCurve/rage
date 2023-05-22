@@ -5,7 +5,7 @@ use rage::{prelude::*, utils::mouse_pos};
 static mut HEARTS: Mutex<Spritesheet> = Mutex::new(Spritesheet::empty());
 
 fn hearts_start(world: &mut World) -> RageResult {
-    world.add_asset("hearts".to_string(), Spritesheet::from("assets/textures/hearts.png", 16, 16, 0)?)?;
+    world.add_asset("hearts", Spritesheet::from("assets/textures/hearts.png", 16, 16, 0)?)?;
 
     let scene = world.new_scene("main")?;
 

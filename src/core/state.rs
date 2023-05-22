@@ -47,7 +47,7 @@ impl From<&[State]> for StateMachine {
 }
 
 impl StateMachine {
-    pub fn change_state(&mut self, name: String) -> StateResult {
+    pub fn change_state(&mut self, name: &str) -> StateResult {
         for i in 0..self.states.len() {
             if self.states[i].name == name {
                 self.state_index = i;
@@ -89,10 +89,10 @@ pub struct State {
 
 impl State {
     pub fn from(
-        name: String,
+        name: &str,
         update: fn(&mut Entity, dt: f64) -> crate::prelude::RageResult,
     ) -> State {
-        State { name, update }
+        State { name: name.to_owned(), update }
     }
     pub fn name(&self) -> String {
         self.name.clone()

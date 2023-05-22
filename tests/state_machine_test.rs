@@ -2,22 +2,22 @@ use lazy_static::lazy_static;
 use rage::prelude::*;
 
 lazy_static! { pub static ref STATES: [State; 2] = [
-    State::from("start".to_string(), 
+    State::from("start", 
         |entity, _dt| {
             entity.get_mut::<SpriteRenderer>()?.color = vec4(1.0, 1.0, 1.0, 1.0);
             if keyboard::is_pressed(glfw::Key::A) {
                 println!("Switched!");
-                entity.get_mut::<StateMachine>()?.change_state("next".to_string())?;
+                entity.get_mut::<StateMachine>()?.change_state("next")?;
             }
             Ok(())
         },
     ),
-    State::from("next".to_string(),
+    State::from("next",
         |entity, _dt| {
             entity.get_mut::<SpriteRenderer>()?.color = vec4(0.5, 0.5, 0.5, 1.0);
             if !keyboard::is_pressed(glfw::Key::A) {
                 println!("Unswitched!");
-                entity.get_mut::<StateMachine>()?.change_state("start".to_string())?;
+                entity.get_mut::<StateMachine>()?.change_state("start")?;
             }
             Ok(())
         },

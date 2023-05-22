@@ -11,12 +11,8 @@ pub struct AssetError {
 pub trait Asset: 'static {
     fn new() -> Self where Self: Sized;
     fn clear(&mut self) -> RageResult;
-    fn as_any(&self) -> &dyn std::any::Any where Self: Sized {
-        self as &dyn std::any::Any
-    }
-    fn as_any_mut(&mut self) -> &mut dyn std::any::Any where Self: Sized {
-        self as &mut dyn std::any::Any
-    }
+    fn as_any(&self) -> &dyn std::any::Any;
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
     // TODO: flawed: use better type checking
     fn type_str() -> &'static str where Self: Sized;
 }
@@ -36,16 +32,26 @@ impl AssetManager {
         self.assets.insert(key, Box::new(asset.clone()));
     }
 
-    pub fn get(&self, key: String) -> Result<&dyn std::any::Any, AssetError> {
+    pub fn get<T: Asset + Clone + 'static>(&self, key: String) -> Result<&T, AssetError> {
         match self.assets.get(&key) {
-            Some(v) => Ok(v as &dyn std::any::Any),
+            Some(v) =>  {
+                match v.as_any().downcast_ref::<T>() {
+                    Some(v) => Ok(v),
+                    None => Err(AssetError { what: format!("Asset of key: {} not of type {}", key, T::type_str())})
+                }
+            }
             None => Err(AssetError { what: format!("Asset of key: {} not found", key) })
         }
     }
 
-    pub fn get_mut(&mut self, key: String) -> Result<&mut dyn std::any::Any, AssetError> {
+    pub fn get_mut<T: Asset + Clone + 'static>(&mut self, key: String) -> Result<&mut T, AssetError> {
         match self.assets.get_mut(&key) {
-            Some(v) => Ok(v as &mut dyn std::any::Any),
+            Some(v) =>  {
+                match v.as_any_mut().downcast_mut::<T>() {
+                    Some(v) => Ok(v),
+                    None => Err(AssetError { what: format!("Asset of key: {} not of type {}", key, T::type_str())})
+                }
+            }
             None => Err(AssetError { what: format!("Asset of key: {} not found", key) })
         }
     }
