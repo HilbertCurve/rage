@@ -12,6 +12,7 @@ image = "0.24.3"
 rodio = "0.17.1"
 lazy_static = "1.4.0"
 rage_macros = { path = "macros", version = "0.1.0" }
+fontdue = "0.7.3"
 
 [dependencies.glfw]
 git = "https://github.com/bjz/glfw-rs.git"

@@ -4,7 +4,7 @@ use std::fmt::{self, Display};
 use std::fs::File;
 use std::io::Read;
 use std::mem;
-use std::ops::{Index, IndexMut};
+use std::ops::{Deref, DerefMut, Index, IndexMut};
 use std::slice;
 
 /// Block: an array of u8's that can be interpreted as
@@ -50,6 +50,11 @@ impl Block {
     #[inline]
     pub fn len(&self) -> usize {
         self.data.len()
+    }
+
+    #[inline]
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.data.clone()
     }
 
     pub unsafe fn get<T: Copy>(&self, offset: usize) -> Result<&T, BlockError> {
@@ -181,6 +186,35 @@ impl Block {
 
         // footer
         println!("}}");
+    }
+}
+
+impl Deref for Block {
+    type Target = [u8];
+    fn deref(&self) -> &Self::Target {
+        self.data.as_slice()
+    }
+}
+
+impl DerefMut for Block {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.data.as_mut_slice()
+    }
+}
+
+impl From<Vec<u8>> for Block {
+    fn from(data: Vec<u8>) -> Self {
+        Self { data }
+    }
+}
+
+impl<T> From<&[T]> for Block where T: Sized + Copy {
+    fn from(data: &[T]) -> Self {
+        let mut ret: Self = Block::empty();
+        for val in data {
+            ret.push::<T>(*val);
+        }
+        ret
     }
 }
 
