@@ -66,7 +66,7 @@ pub fn start() {
         DEFAULT_VB.init(&[0.0; 0], &[0; 0]);
         DEFAULT_VB.bind();
         DEFAULT_VB.refresh();
-        DEFAULT_SHADER = Shader::new("assets/shaders/default.vert", "assets/shaders/default.frag");
+        DEFAULT_SHADER = Shader::new("src/renderer/default.vert", "src/renderer/default.frag");
         DEFAULT_VB.enable_attribs();
 
         gl::ClearColor(0.0, 0.0, 0.0, 1.0);
