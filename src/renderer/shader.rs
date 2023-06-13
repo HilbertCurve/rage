@@ -14,16 +14,12 @@ pub struct Shader {
 
 impl Shader {
     // TODO: make this return Result<Shader, Box<dyn Error>>
-    pub fn new(vert_path: &str, frag_path: &str) -> Shader {
-        let mut vert_code = fs::read_to_string(vert_path)
-            .expect("Better errors, please!");
+    pub fn new(mut vert_code: String, mut frag_code: String) -> Shader {
         vert_code.push('\0');
         let vert_len = vert_code.len() as i32 + 1;
         let vert_code: CString = CString::from_vec_with_nul(vert_code.into_bytes())
             .expect("invalid vertex code utf8");
 
-        let mut frag_code = fs::read_to_string(frag_path)
-            .expect("Better errors, please...?");
         frag_code.push('\0');
         let frag_len = frag_code.len() as i32 + 1;
         let frag_code: CString = CString::from_vec_with_nul(frag_code.into_bytes())
@@ -112,6 +108,16 @@ impl Shader {
         }
 
         Shader { v_id, f_id, p_id, is_used: false }
+    }
+
+    pub fn from_file(vert_path: &str, frag_path: &str) -> Shader {
+        let vert_code = fs::read_to_string(vert_path)
+            .expect(&format!("error processing file {}:", vert_path));
+
+        let frag_code = fs::read_to_string(frag_path)
+            .expect(&format!("error processing file {}:", frag_path));
+
+        Shader::new(vert_code, frag_code)
     }
 
     pub const fn new_uninit() -> Shader {

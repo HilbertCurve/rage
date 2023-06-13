@@ -54,6 +54,92 @@ pub trait Renderable {
 }
 
 static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
+
+const VERT_CODE: &str = 
+"#version 330 core
+#ifdef GL_ES
+ precision mediump float;
+#endif
+
+layout (location=0) in vec3 aPos;
+layout (location=1) in vec4 aColor;
+layout (location=2) in vec2 aTexUV;
+layout (location=3) in float aTexID;
+
+uniform mat4 uProjection;
+uniform mat4 uView;
+
+out vec4 fPos;
+out vec4 fColor;
+out vec2 fTexUV;
+out float fTexID;
+
+void main()
+{
+    fPos = uProjection * uView * vec4(aPos, 1.0);
+    fColor = aColor;
+    fTexUV = aTexUV;
+    fTexID = aTexID;
+    gl_Position = uProjection * uView * vec4(aPos, 1.0);
+}";
+const FRAG_CODE: &str = 
+"#version 330 core
+
+in vec4 fPos;
+in vec4 fColor;
+in vec2 fTexUV;
+in float fTexID;
+
+uniform sampler2D uTextures[8];
+// uniform float uTime;
+
+out vec4 color;
+void main()                          
+{
+    /*
+    if (fTexID != 0.0)
+    {
+        color = fColor * texture(uTextures[int(fTexID - 1)], fTexUV);
+    }
+    */
+    if (fTexID == 1.0)
+    {
+        color = fColor * texture(uTextures[0], fTexUV);
+    }
+    else if (fTexID == 2.0)
+    {
+        color = fColor * texture(uTextures[1], fTexUV);
+    }
+    else if (fTexID == 3.0)
+    {
+        color = fColor * texture(uTextures[2], fTexUV);
+    }
+    else if (fTexID == 4.0)
+    {
+        color = fColor * texture(uTextures[3], fTexUV);
+    }
+    else if (fTexID == 5.0)
+    {
+        color = fColor * texture(uTextures[4], fTexUV);
+    }
+    else if (fTexID == 6.0)
+    {
+        color = fColor * texture(uTextures[5], fTexUV);
+    }
+    else if (fTexID == 7.0)
+    {
+        color = fColor * texture(uTextures[6], fTexUV);
+    }
+    else if (fTexID == 8.0)
+    {
+        color = fColor * texture(uTextures[7], fTexUV);
+    }
+    else
+    {
+        color = fColor;
+    }
+}";
+
 pub static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
 
 pub fn start() {
@@ -66,7 +152,7 @@ pub fn start() {
         DEFAULT_VB.init(&[0.0; 0], &[0; 0]);
         DEFAULT_VB.bind();
         DEFAULT_VB.refresh();
-        DEFAULT_SHADER = Shader::new("src/renderer/default.vert", "src/renderer/default.frag");
+        DEFAULT_SHADER = Shader::new(VERT_CODE.to_owned(), FRAG_CODE.to_owned());
         DEFAULT_VB.enable_attribs();
 
         gl::ClearColor(0.0, 0.0, 0.0, 1.0);
