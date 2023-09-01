@@ -6,7 +6,7 @@ use glfw::Context;
 use crate::ecs::prelude::*;
 use crate::core::{self, prelude::*};
 use crate::core::scene::{Scene, SceneError};
-use crate::renderer::model::{MODEL_VB, MODEL_SHADER};
+// use crate::renderer::model::{MODEL_VB, MODEL_SHADER};
 use crate::renderer::renderer::{self, DEFAULT_VB, DEFAULT_SHADER};
 
 use std::fmt::Display;
@@ -263,11 +263,11 @@ impl World {
             (self.update)(&mut self)?;
             let wdt = self.dt.clone();
             self.current_scene()?.update::<SpriteRenderer>(wdt)?;
-            self.current_scene()?.update::<ModelRenderer>(wdt)?;
+          //self.current_scene()?.update::<ModelRenderer>(wdt)?;
             self.current_scene()?.update::<StateMachine>(wdt)?;
           //self.current_scene()?.update::<Collider>()?;
             unsafe { renderer::render(&mut DEFAULT_VB, &mut DEFAULT_SHADER) };
-            unsafe { renderer::render(&mut MODEL_VB, &mut MODEL_SHADER) };
+          //unsafe { renderer::render(&mut MODEL_VB, &mut MODEL_SHADER) };
 
             window.swap_buffers();
 
