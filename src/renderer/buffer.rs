@@ -53,13 +53,17 @@ pub struct VertexBuffer {
     ibo: u32,
     pub layout: Vec<VAttrib>, // should this be a slice???
     pub is_used: bool,
-    prim: &'static primitive::Primitive,
+    pub prim: &'static primitive::Primitive,
     /// Number of elements to be rendered, as based on vb.len();
     /// The user is responsible for managing the value of this item,
     /// as doing so automatically could lead to UB
     pub size: u32,
     pub vb: Block,
+    /// Length, in bytes, of elements in the vertex buffer
+    pub vb_type_len: usize,
     pub ib: Block,
+    /// Length, in bytes, of elements in the index buffer
+    pub ib_type_len: usize,
 }
 
 impl VertexBuffer {
@@ -80,7 +84,9 @@ impl VertexBuffer {
             prim: &primitive::NONE,
             size: 0,
             vb: Block::empty(),
+            vb_type_len: 0,
             ib: Block::empty(),
+            ib_type_len: 0,
         }
     }
 
@@ -92,43 +98,15 @@ impl VertexBuffer {
         self.prim = prim;
     }
 
-    pub fn init(&mut self, vb: &[f32], ib: &[u32]) {
+    pub fn init(&mut self) {
         unsafe {
             gl::GenVertexArrays(1, &mut self.vao);
             gl::GenBuffers(1, &mut self.vbo);
             gl::GenBuffers(1, &mut self.ibo);
-
-            gl::BindVertexArray(self.vao);
-
-            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                (vb.len() * mem::size_of::<f32>()) as isize,
-                vb.as_ptr().cast(),
-                gl::DYNAMIC_DRAW
-                );
-
-            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ibo);
-            gl::BufferData(
-                gl::ELEMENT_ARRAY_BUFFER,
-                (ib.len() * mem::size_of::<u32>()) as isize,
-                ib.as_ptr().cast(),
-                gl::DYNAMIC_DRAW
-                );
-
-            gl::BindVertexArray(0);
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
 
         self.vb.clear();
         self.ib.clear();
-        for item in vb {
-            self.vb.push(*item);
-        }
-        for item in ib {
-            self.ib.push(*item);
-        }
     }
 
     pub fn bind(&mut self) {
@@ -156,24 +134,26 @@ impl VertexBuffer {
             self.bind();
         }
 
-        unsafe {
+        if self.prim.auto_size {
             self.vb.resize(self.size as usize * self.layout_len() as usize);
             self.ib.resize(self.size as usize *
-                           self.prim.index_count as usize *
-                           std::mem::size_of::<u32>());
+                        self.prim.index_count as usize *
+                        std::mem::size_of::<u32>());
             for i in 0..self.size { // TODO: use dirty flags
                 (self.prim.gen_indices)(&mut self.ib, i);
             }
+        }
 
+        unsafe {
             gl::BufferData(
                 gl::ARRAY_BUFFER,
-                (self.vb.len() * mem::size_of::<f32>()) as isize,
+                self.vb.len() as isize,
                 self.vb.as_ptr().cast(),
                 gl::DYNAMIC_DRAW
                 );
             gl::BufferData(
                 gl::ELEMENT_ARRAY_BUFFER,
-                (self.ib.len()) as isize,
+                self.ib.len() as isize,
                 self.ib.as_ptr().cast(),
                 gl::DYNAMIC_DRAW
                 );
@@ -186,10 +166,10 @@ impl VertexBuffer {
         self.size = 0;
     }
 
-    pub fn layout_len(&self) -> u32 {
+    pub fn layout_len(&self) -> usize {
         self.layout.iter().try_fold(
-            0u32,
-            |acc, x| acc.checked_add(x.v_type.size_bytes() as u32 * x.v_count)
+            0usize,
+            |acc, x| acc.checked_add(x.v_type.size_bytes() * x.v_count as usize)
             ).expect("who knows what went wrong")
     }
     

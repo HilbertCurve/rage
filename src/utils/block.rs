@@ -53,8 +53,8 @@ impl Block {
     }
 
     #[inline]
-    pub fn to_vec(&self) -> Vec<u8> {
-        self.data.clone()
+    pub fn to_vec(&self) -> &Vec<u8> {
+        &self.data
     }
 
     pub unsafe fn get<T: Copy>(&self, offset: usize) -> Result<&T, BlockError> {

@@ -1,6 +1,7 @@
 use crate::ecs::component::{ComponentError, DynComponent};
 use crate::ecs::entity::Entity;
 
+use std::collections::HashSet;
 use std::error::Error;
 use std::ops::{Index, IndexMut};
 
@@ -110,6 +111,20 @@ impl Scene {
         }
 
         Err(SceneError::new(&format!("Entity of name: {} not found in Scene of name: {}", name, self.name)))
+    }
+    pub fn unzip(&mut self, names: HashSet<&str>) -> Result<Vec<*mut Entity>, SceneError> {
+        // SAFETY: entities have no ability to mutate each other; individual entity references are safe
+        let ptr = self as *mut Scene;
+
+        let mut vec: Vec<*mut Entity> = vec![];
+        for name in names {
+            unsafe {
+                vec.push((&mut *ptr).get_mut(&name)?);
+            }
+        }
+        
+
+        Ok(vec)
     }
 
     pub fn update<T: DynComponent>(&mut self, dt: f64) -> Result<(), ComponentError> {

@@ -1,3 +1,5 @@
+//! WIP
+
 extern crate fontdue;
 
 use std::{fs::File, path::Path, collections::HashMap};
@@ -6,6 +8,7 @@ use glam::{UVec2, uvec2};
 use image::{ImageBuffer, DynamicImage, GrayImage};
 
 use crate::{prelude::Block, impl_error};
+
 
 pub struct Font {
     id: u32,

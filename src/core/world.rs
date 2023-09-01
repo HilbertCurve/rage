@@ -6,7 +6,8 @@ use glfw::Context;
 use crate::ecs::prelude::*;
 use crate::core::{self, prelude::*};
 use crate::core::scene::{Scene, SceneError};
-use crate::renderer::renderer;
+use crate::renderer::model::{MODEL_VB, MODEL_SHADER};
+use crate::renderer::renderer::{self, DEFAULT_VB, DEFAULT_SHADER};
 
 use std::fmt::Display;
 use std::sync::mpsc::Receiver;
@@ -262,9 +263,11 @@ impl World {
             (self.update)(&mut self)?;
             let wdt = self.dt.clone();
             self.current_scene()?.update::<SpriteRenderer>(wdt)?;
+            self.current_scene()?.update::<ModelRenderer>(wdt)?;
             self.current_scene()?.update::<StateMachine>(wdt)?;
           //self.current_scene()?.update::<Collider>()?;
-            renderer::update();
+            unsafe { renderer::render(&mut DEFAULT_VB, &mut DEFAULT_SHADER) };
+            unsafe { renderer::render(&mut MODEL_VB, &mut MODEL_SHADER) };
 
             window.swap_buffers();
 
@@ -288,7 +291,7 @@ impl World {
     fn window_init(&mut self) -> Result<GlfwConf, String> {
         // starting window
 
-        let mut inst = glfw::init(glfw::FAIL_ON_ERRORS)
+        let mut inst = glfw::init(glfw::fail_on_errors)
             .or(Err("Could not initialize GLFW instance.".to_owned()))?;
 
         inst.window_hint(glfw::WindowHint::ContextVersion(3, 3));

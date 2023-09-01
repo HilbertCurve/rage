@@ -213,7 +213,7 @@ impl Renderable for SpriteRenderer {
                 self.textures[self.cur_tex].id as f32)
                 .or(Err(RenderError::from(&format!("bad block insertion"))))?;
 
-            offset += buf.layout_len() as usize;
+            offset += buf.layout_len();
             acc += 2;
         }
 

@@ -11,6 +11,8 @@ use std::fmt::{self, Display};
 use std::ptr;
 use std::sync::Mutex;
 
+use super::{model::{MODEL_SHADER, MODEL_VB}, buffer::{VAttrib, VProp, VType}};
+
 // global variable, bc idk, probably best
 pub static TEX_POOL: Mutex<Vec<Spritesheet>> = Mutex::new(vec![]);
 
@@ -53,7 +55,7 @@ pub trait Renderable {
     fn to_buffer(&self, buf: &mut VertexBuffer) -> Result<(), RenderError>;
 }
 
-static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
+pub static mut DEFAULT_SHADER: Shader = Shader::new_uninit();
 
 const VERT_CODE: &str = 
 "#version 330 core
@@ -144,31 +146,37 @@ pub static mut DEFAULT_VB: VertexBuffer = VertexBuffer::new();
 
 pub fn start() {
     unsafe {
-        // this spot is for initializing default vertex buf, data buf,
-        // and shader, along with some gl settings
+        // this spot is for initializing vertex buffers, data buffers,
+        // and shaders, along with some gl settings
 
         DEFAULT_VB.set_layout(&VertexBuffer::DEFAULT_ATTRIBS);
         DEFAULT_VB.set_primitive(&primitive::QUAD);
-        DEFAULT_VB.init(&[0.0; 0], &[0; 0]);
-        DEFAULT_VB.bind();
-        DEFAULT_VB.refresh();
         DEFAULT_SHADER = Shader::new(VERT_CODE.to_owned(), FRAG_CODE.to_owned());
-        DEFAULT_VB.enable_attribs();
+
+        MODEL_VB.set_layout(&[
+            VAttrib { v_prop: VProp::Position, v_type: VType::Float, v_count: 3 },
+            VAttrib { v_prop: VProp::Color, v_type: VType::Float, v_count: 4 },
+            VAttrib { v_prop: VProp::Other, v_type: VType::Float, v_count: 3 },
+            VAttrib { v_prop: VProp::TexUV, v_type: VType::Float, v_count: 2 },
+            VAttrib { v_prop: VProp::TexID, v_type: VType::Float, v_count: 1 },
+        ]);
+        MODEL_VB.set_primitive(&primitive::MODEL);
+        MODEL_SHADER = Shader::new(super::model::VERT_CODE.to_owned(), super::model::FRAG_CODE.to_owned());
 
         gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     }
 }
 
-pub fn update() {
+pub fn render(buffer: &mut VertexBuffer, shader: &mut Shader) {
     // TODO: static vec of data buffers, render each according to their primitive
     unsafe {
         gl_err_clear();
         gl::Clear(gl::COLOR_BUFFER_BIT);
         gl_err_check(line!());
 
-        DEFAULT_VB.bind();
+        buffer.bind();
         gl_err_check(line!());
-        DEFAULT_VB.refresh();
+        buffer.refresh();
         gl_err_check(line!());
 
         // attach textures
@@ -178,11 +186,11 @@ pub fn update() {
         }
 
         // shader stuff
-        DEFAULT_SHADER.attach();
+        shader.attach();
         gl_err_check(line!());
-        DEFAULT_SHADER.set_uniform_mat4("uProjection", Camera::get().projection_mat());
+        shader.set_uniform_mat4("uProjection", Camera::get().projection_mat());
         gl_err_check(line!());
-        DEFAULT_SHADER.set_uniform_mat4("uView", Camera::get().view_mat());
+        shader.set_uniform_mat4("uView", Camera::get().view_mat());
         gl_err_check(line!());
         // there must be a better way to do this
         let mut ids;
@@ -196,34 +204,33 @@ pub fn update() {
             }
         }
         // make sure to attach integer values to the uTextures as well!!!
-        DEFAULT_SHADER.set_uniform_i32_array(
+        shader.set_uniform_i32_array(
             "uTextures",
             TEX_POOL.try_lock().unwrap().len() as i32,
             ids.as_ptr(),
         );
 
         // vertex attrib pointers
-        DEFAULT_VB.enable_attribs();
+        buffer.enable_attribs();
         gl_err_check(line!());
 
         // draw
-        let quad = &primitive::QUAD;
         gl::DrawElements(
-            quad.gl_prim,
-            DEFAULT_VB.ib.len() as i32 / std::mem::size_of::<u32>() as i32,
+            buffer.prim.gl_prim,
+            buffer.ib.len() as i32 / std::mem::size_of::<u32>() as i32,
             gl::UNSIGNED_INT,
             ptr::null()
             );
         gl_err_check(line!());
 
-        DEFAULT_VB.disable_attribs();
+        buffer.disable_attribs();
         gl_err_check(line!());
 
-        DEFAULT_VB.unbind();
+        buffer.unbind();
         gl_err_check(line!());
-        DEFAULT_VB.clear();
+        buffer.clear();
         gl_err_check(line!());
-        DEFAULT_SHADER.detach();
+        shader.detach();
         gl_err_check(line!());
 
         // detach textures

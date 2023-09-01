@@ -8,6 +8,7 @@ pub struct Primitive {
     pub vert_count: u32,
     pub index_count: u32,
     pub gl_prim: gl::types::GLenum,
+    pub auto_size: bool,
     pub gen_indices: fn(&mut Block, u32),
 }
 
@@ -15,6 +16,7 @@ pub const QUAD: Primitive = Primitive {
     vert_count: 4,
     index_count: 6,
     gl_prim: gl::TRIANGLES,
+    auto_size: true,
     gen_indices: |elements, location| {
         let offset: usize = location as usize * 6 * mem::size_of::<u32>();
         let index: u32 = location * 4;
@@ -36,12 +38,23 @@ pub const QUAD: Primitive = Primitive {
     },
 };
 
+pub const MODEL: Primitive = Primitive {
+    vert_count: 1,
+    index_count: 1,
+    gl_prim: gl::TRIANGLES,
+    auto_size: false,
+    gen_indices: |_, _| {
+        // indices are automatically generated
+    },
+};
+
 pub const NONE: Primitive = Primitive {
     vert_count: 0,
     index_count: 0,
     gl_prim: 0,
+    // if true, this automatically resizes vertex buffer to zero size
+    auto_size: true,
     gen_indices: |_, _| {
         eprintln!("Attempted index buffering on NONE primitive.");
     },
 };
-

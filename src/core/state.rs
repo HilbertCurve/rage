@@ -83,8 +83,8 @@ impl DynComponent for StateMachine {
 
 #[derive(Clone)]
 pub struct State {
-    name: String,
-    update: fn(&mut Entity, dt: f64) -> crate::prelude::RageResult,
+    pub name: String,
+    pub update: fn(&mut Entity, dt: f64) -> crate::prelude::RageResult,
 }
 
 impl State {
