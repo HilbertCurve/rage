@@ -133,12 +133,14 @@ impl VertexBuffer {
         if !self.is_used {
             self.bind();
         }
+        super::renderer::gl_err_check(line!());
 
         if self.prim.auto_size {
-            self.vb.resize(self.size as usize * self.layout_len() as usize);
             self.ib.resize(self.size as usize *
                         self.prim.index_count as usize *
                         std::mem::size_of::<u32>());
+            super::renderer::gl_err_check(line!());
+
             for i in 0..self.size { // TODO: use dirty flags
                 (self.prim.gen_indices)(&mut self.ib, i);
             }
@@ -151,12 +153,15 @@ impl VertexBuffer {
                 self.vb.as_ptr().cast(),
                 gl::DYNAMIC_DRAW
                 );
+            super::renderer::gl_err_check(line!());
+
             gl::BufferData(
                 gl::ELEMENT_ARRAY_BUFFER,
                 self.ib.len() as isize,
                 self.ib.as_ptr().cast(),
                 gl::DYNAMIC_DRAW
                 );
+            super::renderer::gl_err_check(line!());
         }
     }
 

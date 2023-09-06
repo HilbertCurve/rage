@@ -151,7 +151,12 @@ pub fn start() {
 
         DEFAULT_VB.set_layout(&VertexBuffer::DEFAULT_ATTRIBS);
         DEFAULT_VB.set_primitive(&primitive::QUAD);
+
+        DEFAULT_VB.init();
+        DEFAULT_VB.bind();
+        DEFAULT_VB.refresh();
         DEFAULT_SHADER = Shader::new(VERT_CODE.to_owned(), FRAG_CODE.to_owned());
+        DEFAULT_VB.enable_attribs();
 
         MODEL_VB.set_layout(&[
             VAttrib { v_prop: VProp::Position, v_type: VType::Float, v_count: 3 },
