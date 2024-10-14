@@ -10,6 +10,7 @@ export MESA_GL_VERSION_OVERRIDE=3.3
 - [x] Basic Renderer
 - [x] Suitable audio engine
 - [ ] Functional World-Scene-Entity-Component system
+- [ ] Complete refactoe of ECS: no lifetimes, better semantics encoding in type system.
 - [ ] 3D Renderer
 - [ ] rage UI????
 - [ ] Physics engine???
