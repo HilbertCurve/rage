@@ -1,7 +1,7 @@
 extern crate gl;
 extern crate glfw;
 
-use glfw::Context;
+use glfw::{Context, GlfwReceiver};
 
 use crate::ecs::prelude::*;
 use crate::core::{self, prelude::*};
@@ -10,13 +10,14 @@ use crate::core::scene::{Scene, SceneError};
 use crate::renderer::renderer::{self, DEFAULT_VB, DEFAULT_SHADER};
 
 use std::fmt::Display;
+use std::ptr::addr_of_mut;
 use std::sync::mpsc::Receiver;
 use glam::*;
 
 use super::assets::{AssetManager, Asset, AssetError};
 
 pub type RageResult = Result<(), Box<dyn std::error::Error>>;
-type GlfwConf = (glfw::Glfw, glfw::Window, Receiver<(f64, glfw::WindowEvent)>);
+type GlfwConf = (glfw::Glfw, glfw::PWindow, GlfwReceiver<(f64, glfw::WindowEvent)>);
 
 #[derive(Debug)]
 pub struct WorldError {
@@ -266,7 +267,7 @@ impl World {
           //self.current_scene()?.update::<ModelRenderer>(wdt)?;
             self.current_scene()?.update::<StateMachine>(wdt)?;
           //self.current_scene()?.update::<Collider>()?;
-            unsafe { renderer::render(&mut DEFAULT_VB, &mut DEFAULT_SHADER) };
+            unsafe { renderer::render(&mut *addr_of_mut!(DEFAULT_VB), &mut DEFAULT_SHADER) };
           //unsafe { renderer::render(&mut MODEL_VB, &mut MODEL_SHADER) };
 
             window.swap_buffers();
